@@ -681,7 +681,7 @@
           <tr><td class="mono">D · DS · LA · PR · UN</td><td>Dimension styles · Drafting settings (object-snap modes, tracking, dynamic input, lineweight display) · Layers panel · Properties panel · Units (View tab)</td></tr>
           <tr><td class="mono">F7 Grid · F9 Snap · F8 Ortho · F10 Polar · F3 OSnap · F11 OTrack · F12 Dyn · F2 History</td><td>Ortho locks horizontal/vertical (Shift temporarily inverts it); Polar snaps to the chosen increment plus your custom angles (View tab → Polar settings) with a dotted tracking path and tooltip; object snap finds endpoints, midpoints, centres, quadrants, intersections (nearest optional in DS); OTrack tracks horizontally/vertically from hovered snap points; the status-bar pills at bottom-right toggle the same aids</td></tr>
           <tr><td class="mono">Typed entry</td><td>Line: length + angle · Rect: W,H · Circle: radius or D120 for diameter · Move/Copy: ΔX,ΔY · Offset: distance, two points, or M for Multiple</td></tr>
-          <tr><td class="mono">Window / Crossing</td><td>No holding the button: click one corner, move, click the opposite corner (press-and-drag still works too). Left→right (blue) selects fully-enclosed objects only; right→left (green dashed) selects anything touched. Works idle and at any "Select objects:" prompt (MOVE, COPY…); Esc cancels a half-built window</td></tr>
+          <tr><td class="mono">Window / Crossing</td><td>No holding the button: click one corner, move, click the opposite corner (press-and-drag still works too). Left→right (blue) selects fully-enclosed objects only; right→left (green dashed) selects anything touched. Works idle and at any "Select objects:" step (MOVE, COPY…); Esc cancels a half-built window</td></tr>
           <tr><td class="mono">Enter / Space</td><td>Space works exactly like Enter (AutoCAD-style): it runs a typed command, confirms typed values and selections, finishes polylines, and repeats the last command when idle. It only inserts a real space while typing actual text</td></tr>
           <tr><td class="mono">Command window</td><td>Drag the grip strip above the command line to show more or fewer history lines (double-click resets); the size is saved with the drawing. Zoom buttons and Fit glide smoothly; the object under the cursor highlights before you pick it</td></tr>
           <tr><td class="mono">Dim styles</td><td>Top bar → Dim styles: arrowheads, text height/placement, ft-in/fractional/decimal precision, extension offsets. Changing a style restyles its dimensions</td></tr>
@@ -1295,7 +1295,7 @@
       };
     }
     /* ================= canvas & rendering ================= */
-    const cv = $("#cv"), ctx = cv.getContext("2d");
+    const cv = $("#cv"); let ctx = cv.getContext("2d"); // let: drawDim swaps ctx for offscreen (print/SVG) rendering
     const wrap = $("#canvasWrap");
     let CW = 0, CH = 0, DPR = 1;
     const imageCache = {};
@@ -4973,10 +4973,10 @@
         del.className = "mini"; del.textContent = "✕"; del.title = "Delete layer";
         del.addEventListener("click", ev=>{
           ev.stopPropagation();
-          if (layers.length === 1){ showConfirm("Keep one layer", "A drawing needs at least one layer.", ()=>{}); return; }
+          if (layers.length === 1){ askInPage("Keep one layer", "A drawing needs at least one layer.", ()=>{}); return; }
           const n = entities.filter(e=>e.layer===l.id).length;
           const msg = n ? `Layer "${l.name}" holds ${n} object${n>1?"s":""}. Deleting the layer deletes those objects too.` : `Delete layer "${l.name}"?`;
-          showConfirm("Delete layer?", msg, ()=>{
+          askInPage("Delete layer?", msg, ()=>{
             pushHistory();
             entities = entities.filter(e=>e.layer!==l.id);
             selection.clear();
@@ -5406,7 +5406,7 @@
 
     /* ================= confirm dialog ================= */
     let confirmCb = null;
-    function showConfirm(title, text, cb){
+    function askInPage(title, text, cb){
       $("#confirmTitle").textContent = title;
       $("#confirmText").textContent = text;
       confirmCb = cb;
@@ -5776,9 +5776,9 @@
     });
     $("#dsRename").addEventListener("click", ()=>{ const el = $("#dsName"); if (el){ el.focus(); el.select(); } });
     $("#dsDelete").addEventListener("click", ()=>{
-      if (dimStyles.length <= 1){ showConfirm("Keep one style", "A drawing needs at least one dimension style.", ()=>{}); return; }
+      if (dimStyles.length <= 1){ askInPage("Keep one style", "A drawing needs at least one dimension style.", ()=>{}); return; }
       const s = dimStyleById(dsSelId);
-      showConfirm("Delete style?", `Dimensions using "${s.name}" will switch to the current style.`, ()=>{
+      askInPage("Delete style?", `Dimensions using "${s.name}" will switch to the current style.`, ()=>{
         dimStyles = dimStyles.filter(x=>x.id!==s.id);
         if (currentDimStyleId === s.id) currentDimStyleId = dimStyles[0].id;
         entities.forEach(e=>{ if (e.type==="dim" && e.style===s.id) e.style = currentDimStyleId; });
@@ -5827,7 +5827,7 @@
           b.addEventListener("contextmenu", ev=>{
             ev.preventDefault();
             const L = layouts.find(l=>l.id===id); if (!L) return;
-            showConfirm("Delete layout?", `Delete sheet "${L.name}" and its viewports? Model-space geometry is not affected.`, ()=>{
+            askInPage("Delete layout?", `Delete sheet "${L.name}" and its viewports? Model-space geometry is not affected.`, ()=>{
               pushHistory();
               layouts = layouts.filter(l=>l.id!==id);
               if (activeTab === id) switchTab("model");
@@ -6162,7 +6162,7 @@
         const pdf = $("#layPdf"); if (pdf) pdf.addEventListener("click", exportSheetPDF);
         const png = $("#layPng"); if (png) png.addEventListener("click", exportSheetPNG);
         const del = $("#layDelete"); if (del) del.addEventListener("click", ()=>{
-          showConfirm("Delete layout?", `Delete sheet "${L.name}"? Model geometry is not affected.`, ()=>{
+          askInPage("Delete layout?", `Delete sheet "${L.name}"? Model geometry is not affected.`, ()=>{
             pushHistory();
             layouts = layouts.filter(l=>l.id!==L.id);
             switchTab("model");
@@ -6182,13 +6182,13 @@
     }
     function exportSheetPNG(){
       const L = activeLayout() || layouts[0];
-      if (!L){ showConfirm("No layout", "Add a layout tab first, then export the sheet.", ()=>{}); return; }
+      if (!L){ askInPage("No layout", "Add a layout tab first, then export the sheet.", ()=>{}); return; }
       const c = sheetRenderCanvas(L, 6);
       c.toBlob(b=> download(fileBase() + "-" + L.name.replace(/\s+/g,"-") + ".png", b), "image/png");
     }
     function exportSheetPDF(){
       const L = activeLayout() || layouts[0];
-      if (!L){ showConfirm("No layout", "Add a layout tab first, then export the sheet.", ()=>{}); return; }
+      if (!L){ askInPage("No layout", "Add a layout tab first, then export the sheet.", ()=>{}); return; }
       const c = sheetRenderCanvas(L, 5);
       const jpgUrl = c.toDataURL("image/jpeg", 0.92);
       const bin = atob(jpgUrl.split(",")[1]);
@@ -6318,7 +6318,7 @@
     }
     function confirmApply(fn){
       const go = ()=>{ $("#templateOverlay").classList.remove("open"); fn(); };
-      if (entities.length) showConfirm("Start a new drawing?", "The current drawing will be cleared (Undo can bring it back). Export or save it first if you want to keep it.", go);
+      if (entities.length) askInPage("Start a new drawing?", "The current drawing will be cleared (Undo can bring it back). Export or save it first if you want to keep it.", go);
       else go();
     }
     $("#tplSaveBtn").addEventListener("click", ()=>{
@@ -6447,7 +6447,7 @@
       const box = $("#cmdSuggest"), inp = $("#cmdInput");
       if (dyn){ hideSuggest(); return; }
       // While MOVE/COPY waits for a base point, a displacement, or a second
-      // point, typed letters are options/values for that prompt (D means
+      // point, typed letters are options/values for that step (D means
       // Displacement here) — never new commands, so no autocomplete.
       if (cmd && (cmd.name === "move" || cmd.name === "copy") && (cmd.step === "base" || cmd.step === "dest" || cmd.step === "displacement")){ hideSuggest(); return; }
       const q = inp.value.trim().toLowerCase();
@@ -6531,7 +6531,7 @@
           return;
         }
         if (cmd.step === "dest" && cmd.base){
-          // Typed displacement at the second-point prompt (AutoCAD):
+          // Typed displacement at the second-point step (AutoCAD):
           // "@dx,dy", "dx,dy" in the ΔX/ΔY sense, and "dist<angle" all
           // move/copy by that vector from the base point. This is the
           // direct-typing route — the user never has to drag the object.
@@ -6571,7 +6571,7 @@
           return;
         }
       }
-      // LENGTHEN mode words work at any of its prompts (DElta / Total).
+      // LENGTHEN mode words work at any of its steps — DElta / Total.
       if (cmd && cmd.name === "lengthen"){
         const lw0 = raw.split(/\s+/)[0].toLowerCase();
         if (lw0 === "t" || lw0 === "total" || lw0 === "de" || lw0 === "delta"){
@@ -6642,7 +6642,10 @@
     $("#cmdInput").addEventListener("keydown", ev=>{
       if (ev.key === "Enter"){
         ev.preventDefault(); ev.stopPropagation();
-        if (suggOpen && suggSel >= 0 && suggItems[suggSel]){ pickSuggest(suggSel); return; }
+        // A suggestion pick needs actual typed text; on an empty line Enter
+        // is the AutoCAD confirm — accept a <default>, finish a selection,
+        // repeat the last command at idle) — never a re-run of a recent command.
+        if ($("#cmdInput").value.trim() && suggOpen && suggSel >= 0 && suggItems[suggSel]){ pickSuggest(suggSel); return; }
         runCommandLine();
       }
       else if (ev.key === " " || ev.key === "Spacebar"){
@@ -6830,7 +6833,7 @@
           if (!d || !Array.isArray(d.entities) || !Array.isArray(d.layers)) throw new Error("bad file");
           loadDoc(d);
         } catch(err){
-          showConfirm("Couldn't open that file", "It doesn't look like a drawing saved from this app. No changes were made.", ()=>{});
+          askInPage("Couldn't open that file", "It doesn't look like a drawing saved from this app. No changes were made.", ()=>{});
         }
       };
       r.readAsText(f);
@@ -7041,7 +7044,7 @@
     /* ================= SVG / PNG export ================= */
     function svgEsc(s){ return String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
     function exportSVG(){
-      if (!entities.length){ showConfirm("Nothing to export", "The drawing is empty — draw something first, then export.", ()=>{}); return; }
+      if (!entities.length){ askInPage("Nothing to export", "The drawing is empty — draw something first, then export.", ()=>{}); return; }
       let b = null;
       entities.forEach(e=>{
         if (e.type==="image") return;
@@ -7103,7 +7106,7 @@
     }
     $("#mSvg").addEventListener("click", ()=>{ closeMenus(); exportSVG(); });
     function exportPNG(){
-      if (!entities.length){ showConfirm("Nothing to export", "The drawing is empty — draw something first, then export.", ()=>{}); return; }
+      if (!entities.length){ askInPage("Nothing to export", "The drawing is empty — draw something first, then export.", ()=>{}); return; }
       let b = null;
       entities.forEach(e=>{
         const eb = entityBBox(e);
@@ -7204,7 +7207,7 @@
       const r = new FileReader();
       r.onload = ()=> {
         try { importDXF(r.result, f.name); }
-        catch(err){ showConfirm("Couldn't import that DXF", "The file could not be parsed. No changes were made.", ()=>{}); }
+        catch(err){ askInPage("Couldn't import that DXF", "The file could not be parsed. No changes were made.", ()=>{}); }
       };
       r.readAsText(f);
     });
@@ -7275,7 +7278,7 @@
         }
       }
       flush();
-      if (!ents.length){ showConfirm("No supported shapes found", "That DXF didn't contain lines, circles, arcs, polylines, ellipses or text that this app can import.", ()=>{}); return; }
+      if (!ents.length){ askInPage("No supported shapes found", "That DXF didn't contain lines, circles, arcs, polylines, ellipses or text that this app can import.", ()=>{}); return; }
       pushHistory();
       entities.push(...ents);
       selection = new Set(ents.map(x=>x.id));
@@ -7321,7 +7324,7 @@
         selection.clear();
         renderLayers(); renderProps(); updateCounts(); fitView(); draw();
       };
-      if (entities.length) showConfirm("Replace the current drawing?", "The sample loads as a fresh drawing. Your current objects will be removed (Undo can bring them back).", build);
+      if (entities.length) askInPage("Replace the current drawing?", "The sample loads as a fresh drawing. Your current objects will be removed (Undo can bring them back).", build);
       else build();
     });
 

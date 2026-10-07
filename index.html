@@ -2623,7 +2623,7 @@
           + (rectChamfer ? " — chamfer " + formatLen(rectChamfer) + " on new rectangles" : "")
           + (rectFillet ? " — fillet " + formatLen(rectFillet) + " on new rectangles" : ""));
         draw();
-      });
+      }, kind === "chamfer" ? rectChamfer : rectFillet);
     }
     cv.addEventListener("contextmenu", ev=>{
       ev.preventDefault();
@@ -2953,8 +2953,8 @@
               hideDyn(); donutStage = 3;
               setCmdLine("Specify center of donut or <exit>:");
               draw();
-            });
-          });
+            }, donutOut);
+          }, donutIn);
           draw();
           return;
         }
@@ -3126,6 +3126,7 @@
     /* ================= dynamic input (typed values while drawing) ================= */
     const dynBox = $("#dynBox"), dynA = $("#dynA"), dynB = $("#dynB");
     let dynActiveField = "a";
+    let dynEdited = { a:false, b:false }; // per-field: user has typed — stop mouse-following that field
     let lastCommandName = null;   // for Enter/Space repeat, AutoCAD-style
     function positionDynBox(){
       if (!dyn) return;
@@ -3146,18 +3147,39 @@
       // command line, AutoCAD-style) but the floating box stays hidden.
       dynBox.style.display = settings.dynInput ? "flex" : "none";
       positionDynBox();
+      dynEdited = { a:false, b:false };
       followDynValues(true);
+      focusDynField();
+    }
+    // AutoCAD dynamic-input rule: when a value box opens, its current value
+    // is fully selected — the next keystroke REPLACES it, no manual clearing.
+    // Deferred a frame: selecting in the same tick as display:flex can be
+    // dropped by the browser.
+    function focusDynField(){
+      if (!dyn || !settings.dynInput) return;
+      const grab = ()=>{
+        if (!dyn) return;
+        const el = dynFieldEl();
+        try { el.focus(); el.select(); } catch(_){}
+      };
+      if (typeof requestAnimationFrame === "function") requestAnimationFrame(grab);
+      else setTimeout(grab, 0);
     }
     function hideDyn(){
       dyn = null; dynPt = null;
+      // never leave keyboard focus trapped inside the hidden box
+      if (document.activeElement === dynA || document.activeElement === dynB){ try { document.activeElement.blur(); } catch(_){} }
       dynBox.style.display = "none";
     }
     function followDynValues(force){
       if (!dyn || !dyn.followMouse || !dyn.mouseVals) return;
       const vals = dyn.mouseVals();
       if (vals == null) return;
-      if (force || document.activeElement !== dynA) dynA.value = vals.a != null ? vals.a : dynA.value;
-      if (dyn.showB && (force || document.activeElement !== dynB)) dynB.value = vals.b != null ? vals.b : dynB.value;
+      // A field the user has started typing in is theirs — the mouse stops
+      // overwriting it. An untouched field keeps following the mouse, and
+      // while it has focus its live value stays fully selected (AutoCAD).
+      if (vals.a != null && !dynEdited.a){ dynA.value = vals.a; if (document.activeElement === dynA) dynA.select(); }
+      if (dyn.showB && vals.b != null && !dynEdited.b){ dynB.value = vals.b; if (document.activeElement === dynB) dynB.select(); }
       if (dyn.preview) dyn.preview();
     }
     function dynFieldEl(){ return dynActiveField === "b" && dyn && dyn.showB ? dynB : dynA; }
@@ -3174,13 +3196,20 @@
     [dynA, dynB].forEach((inp, i)=>{
       inp.addEventListener("focus", ()=>{ dynActiveField = i ? "b" : "a";
         dynA.classList.toggle("active", dynActiveField==="a"); dynB.classList.toggle("active", dynActiveField==="b"); });
-      inp.addEventListener("input", ()=>{ if (dyn && dyn.preview) dyn.preview(); });
+      inp.addEventListener("input", ()=>{ if (i) dynEdited.b = true; else dynEdited.a = true; if (dyn && dyn.preview) dyn.preview(); });
       inp.addEventListener("keydown", ev=>{
         if (ev.key === "Tab"){ ev.preventDefault(); dynSwitchField(); }
         else if (ev.key === "Enter"){ ev.preventDefault(); dynCommit(); }
         else if (ev.key === " " || ev.key === "Spacebar"){
           if (dynSpaceShouldInsert(inp.value)){ ev.stopPropagation(); return; } // ft-in values keep their spaces
           ev.preventDefault(); dynCommit();
+        }
+        else if (/^[uUcC]$/.test(ev.key) && ev.target === dynA && draft && dyn && dyn.followMouse && (draft.tool === "line" || draft.tool === "polyline" || draft.tool === "spline")){
+          // AutoCAD: U/C stayed command options even with the dyn box focused
+          ev.preventDefault();
+          if (ev.key === "u" || ev.key === "U") undoDraftSegment();
+          else if (draft.tool === "line" && draft.linePts && draft.linePts.length >= 3) closeDraftLine();
+          else if (draft.pts && draft.pts.length >= 3) finishDraft(true);
         }
         else if (ev.key === "Escape"){ ev.preventDefault(); cancelAll(); }
         ev.stopPropagation();
@@ -3416,8 +3445,8 @@
       else if (name === "dimangular"){ cmd.step = "pick"; setCmdLine("Select arc, circle, line, or <specify vertex>:"); }
       else if (name === "hatch"){ cmd.step = "pick"; setCmdLine("Hatch: pick a closed object — rectangle, circle, ellipse or closed polyline (click its edge or inside it):"); }
       else if (name === "matchprop"){ cmd.step = "source"; setCmdLine("Match properties: select source object:"); }
-      else if (name === "fillet"){ cmd.step = "dist"; cmd.radius = lastFilletR; setCmdLine("Fillet: radius is " + formatLen(cmd.radius) + " — Enter to use, or type a radius (0 = sharp corner). Then click two lines."); showLenDyn("Radius", v=>{ if (v!=null){ cmd.radius = Math.max(0,v); lastFilletR = cmd.radius; } cmd.step="pick1"; hideDyn(); setCmdLine("Fillet: click the first line."); }); }
-      else if (name === "chamfer"){ cmd.step = "dist"; cmd.dist = lastChamferD; setCmdLine("Chamfer: distance is " + formatLen(cmd.dist) + " — Enter to use, or type a distance. Then click two lines."); showLenDyn("Distance", v=>{ if (v!=null){ cmd.dist = Math.max(0,v); lastChamferD = cmd.dist; } cmd.step="pick1"; hideDyn(); setCmdLine("Chamfer: click the first line."); }); }
+      else if (name === "fillet"){ cmd.step = "dist"; cmd.radius = lastFilletR; setCmdLine("Fillet: radius is " + formatLen(cmd.radius) + " — Enter to use, or type a radius (0 = sharp corner). Then click two lines."); showLenDyn("Radius", v=>{ if (v!=null){ cmd.radius = Math.max(0,v); lastFilletR = cmd.radius; } cmd.step="pick1"; hideDyn(); setCmdLine("Fillet: click the first line."); }, lastFilletR); }
+      else if (name === "chamfer"){ cmd.step = "dist"; cmd.dist = lastChamferD; setCmdLine("Chamfer: distance is " + formatLen(cmd.dist) + " — Enter to use, or type a distance. Then click two lines."); showLenDyn("Distance", v=>{ if (v!=null){ cmd.dist = Math.max(0,v); lastChamferD = cmd.dist; } cmd.step="pick1"; hideDyn(); setCmdLine("Chamfer: click the first line."); }, lastChamferD); }
       else if (name === "array"){ cmd.step = "rows"; setCmdLine("Array: number of rows?"); showIntDyn("Rows", 3, v=>{ cmd.rows = Math.max(1, v|0); cmd.step="cols"; setCmdLine("Array: number of columns?"); showIntDyn("Columns", 3, v2=>{ cmd.cols = Math.max(1, v2|0); cmd.step="rowsp"; setCmdLine("Array: spacing between rows?"); showLenDyn("Row spacing", v3=>{ cmd.rowSp = v3||0; cmd.step="colsp"; setCmdLine("Array: spacing between columns?"); showLenDyn("Column spacing", v4=>{ cmd.colSp = v4||0; applyArray(); }); }); }); }); }
     }
     /* ---- MOVE / COPY displacement helpers (AutoCAD) ----
@@ -3495,13 +3524,16 @@
       }
       return [ [x + c, y], [x + w - c, y], [x + w, y + c], [x + w, y + h - c], [x + w - c, y + h], [x, y + h - c], [x, y + c] ];
     }
-    function showLenDyn(label, onValue){
+    function showLenDyn(label, onValue, defVal){
       showDyn({
         labelA: label, showB:false, followMouse:false,
         mouseVals: null,
         commit: ()=>{ const v = parseLen(dynA.value); onValue(v); }
       });
-      dynA.value = ""; setTimeout(()=> dynA.focus(), 30);
+      // Open with the current value in the box, fully selected (AutoCAD):
+      // typing replaces it, Enter accepts it as shown.
+      dynA.value = (defVal != null && isFinite(defVal)) ? fmtInput(defVal) : "";
+      setTimeout(()=> { dynA.focus(); dynA.select(); }, 30);
     }
     function showIntDyn(label, def, onValue){
       showDyn({
@@ -5476,12 +5508,17 @@
           if (cmd && (cmd.name === "move" || cmd.name === "copy") && (cmd.step === "base" || cmd.step === "dest")){ cmdConfirmSelection(); return; }
           dynCommit(); return;
         }
-        if (ev.key === "Backspace"){ ev.preventDefault(); const el = dynFieldEl(); el.value = el.value.slice(0, -1); if (dyn.preview) dyn.preview(); return; }
+        if (ev.key === "Backspace"){ ev.preventDefault(); const el = dynFieldEl(); dynEdited[dynActiveField] = true; el.value = ""; el.focus(); if (dyn.preview) dyn.preview(); return; }
         if (ev.key.length === 1 && /[0-9.\-'"\/,dD@<> ]/.test(ev.key)){
+          // First keystroke into a dyn field REPLACES the live mouse value
+          // (which AutoCAD shows fully selected) — appending to it would
+          // corrupt the value ("127.4" + "3" is not a length).
           ev.preventDefault();
           const el = dynFieldEl();
-          el.value += ev.key;
+          dynEdited[dynActiveField] = true;
+          el.value = ev.key;
           el.focus();
+          try { el.setSelectionRange(el.value.length, el.value.length); } catch(_){}
           if (dyn.preview) dyn.preview();
           return;
         }

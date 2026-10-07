@@ -365,7 +365,8 @@
           <div class="menu" id="fileMenu">
             <button id="mNew">New drawing <span class="kbd">clears canvas</span></button>
             <button id="mOpen">Open drawing (.json)</button>
-            <button id="mSave">Save drawing (.json)</button>
+            <button id="mSaveDxf">Save <span class="kbd">Ctrl+S · AutoCAD .dxf</span></button>
+            <button id="mSave">Save as .json <span class="kbd">editable here</span></button>
             <hr />
             <button id="mImportDxf">Import DXF…</button>
             <button id="mImportImg">Import background image…</button>
@@ -687,9 +688,10 @@
           <tr><td class="mono">Dim styles</td><td>Top bar → Dim styles: arrowheads, text height/placement, ft-in/fractional/decimal precision, extension offsets. Changing a style restyles its dimensions</td></tr>
           <tr><td class="mono">Layouts</td><td>Tabs under the canvas: Model + sheets. Pick a paper size, draw viewports, set print scales like 1/4″=1′-0″, lock them, fill the title block, then Export → Layout sheet (PDF/PNG). Viewport borders never print</td></tr>
           <tr><td class="mono">Templates</td><td>File → New from template: Arch D / Arch C / Letter / A1 / A3 presets, plus Save setup as template for your own</td></tr>
+          <tr><td class="mono">Ctrl+S · SAVE / QSAVE</td><td>Save the drawing as an AutoCAD-compatible .dxf (opens natively in AutoCAD; File → Save as .json keeps the editable app copy)</td></tr>
           <tr><td class="mono">Ctrl+Z / Ctrl+Y · Ctrl+D · Del · arrows</td><td>Undo / redo · duplicate · delete · nudge (Shift = ×10). Scroll zooms, middle-drag or the Pan tool pans, Shift+F fits</td></tr>
         </table>
-        <p><strong>Save your work:</strong> use File → Save drawing to keep an editable .json copy (it stores layers, dim styles and layouts too), or Export → DXF to open the drawing in AutoCAD / LibreCAD. Drawings live in this page only — export before closing the tab.</p>
+        <p><strong>Save your work:</strong> File → Save (or Ctrl+S, or the SAVE command) writes an AutoCAD-compatible .dxf in one click — AutoCAD opens .dxf natively with geometry, layers and dimensions intact (true .dwg is Autodesk's proprietary format, which no browser app can author). File → Save as .json keeps a fully editable copy for this app (dim styles, layouts and templates too); reopen it with File → Open. Drawings live in this page only — save before closing the tab.</p>
         <div class="dlg-actions"><button class="btn" id="helpClose">Close</button></div>
       </div>
     </div>
@@ -5465,6 +5467,9 @@
       if (ev.key === "F11"){ ev.preventDefault(); toggleOtrack(); return; }
       if (ev.key === "F12"){ ev.preventDefault(); toggleDyn(); return; }
       if (ev.ctrlKey && !ev.metaKey && ev.key === "9"){ ev.preventDefault(); const cl = $("#cmdLine"); cl.style.display = cl.style.display === "none" ? "" : "none"; resize(); return; }
+      // Ctrl+S / Cmd+S = Save (AutoCAD .dxf), from anywhere — never the
+      // browser's "save page" dialog.
+      if ((ev.ctrlKey || ev.metaKey) && ev.key.toLowerCase() === "s"){ ev.preventDefault(); saveDXF(); return; }
       if (ev.ctrlKey && !ev.metaKey && (ev.key === "w" || ev.key === "W") && tag !== "input" && tag !== "textarea"){
         ev.preventDefault();
         settings.selCycle = !settings.selCycle; cycleState = null;
@@ -6469,7 +6474,7 @@
         cmd: t.toUpperCase(), target: t, keys: byTarget[t],
         label: names[t] || t, via: byTarget[t].filter(a=> a !== t).slice(0,3).map(a=> a.toUpperCase()).join(" · ")
       }));
-      [ ["ERASE","Erase objects","E"], ["UNDO","Undo","U"], ["REDO","Redo",""], ["OOPS","Restore erased",""],
+      [ ["SAVE","Save (AutoCAD .dxf)","QSAVE"], ["ERASE","Erase objects","E"], ["UNDO","Undo","U"], ["REDO","Redo",""], ["OOPS","Restore erased",""],
         ["REDRAW","Redraw","R"], ["REGEN","Regen","RE"], ["ZOOM","Zoom extents","Z"],
         ["DIMSTYLE","Dimension styles","D"], ["DSETTINGS","Drafting settings","DS"], ["LAYER","Layers","LA"],
         ["PROPERTIES","Properties","PR"], ["LIST","List objects","LI"], ["UNITS","Units","UN"], ["HELP","Help",""] ]
@@ -6664,6 +6669,7 @@
         setCmdLine("Units: " + $("#unitSel").selectedOptions[0].textContent + " — change it in the View tab (Units & grid panel).");
         return;
       }
+      if (tok === "save" || tok === "qsave"){ saveDXF(); return; }
       if (tok === "help"){ $("#helpOverlay").classList.add("open"); return; }
       if (tok === "ortho"){ toggleOrtho(); return; }
       if (tok === "polar"){ togglePolar(); return; }
@@ -6854,9 +6860,20 @@
       setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 400);
     }
     function fileBase(){ return ($("#docName").value || "drawing").trim().replace(/[^\w\- ]+/g,"").replace(/\s+/g,"-") || "drawing"; }
+    // SAVE = one-click AutoCAD-compatible DXF. True .dwg is Autodesk's
+    // proprietary format and can't be authored in a browser, so Save writes
+    // the .dxf that AutoCAD opens natively — geometry, layers and dimensions
+    // intact. The .json stays as the fully editable copy for this app
+    // (it preserves dim styles, layouts and templates).
+    function saveDXF(){
+      exportDXF();
+      cmdLog("Saved " + fileBase() + ".dxf — AutoCAD-compatible DXF: opens natively in AutoCAD with geometry, layers and dimensions intact.");
+    }
+    $("#mSaveDxf").addEventListener("click", ()=>{ closeMenus(); saveDXF(); });
     $("#mSave").addEventListener("click", ()=>{
       closeMenus();
       download(fileBase()+".json", new Blob([JSON.stringify(docData(), null, 1)], { type:"application/json" }));
+      cmdLog("Saved " + fileBase() + ".json — this app's editable format (keeps dim styles, layouts and templates).");
     });
     $("#mOpen").addEventListener("click", ()=>{ closeMenus(); $("#fileOpen").click(); });
     $("#fileOpen").addEventListener("change", ()=>{

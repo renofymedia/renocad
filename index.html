@@ -355,49 +355,175 @@
         .panel{ transition:none; }
         *, *::before, *::after{ animation:none !important; transition:none !important; }
       }
+
+      /* ---------- AutoCAD 2026 chrome: application button, file tabs,
+         ViewCube, navigation bar, status-bar chips, ribbon minimize --- */
+      .appbtn{
+        width:44px; height:32px; border:none; border-radius:4px; cursor:pointer; flex:none;
+        background:linear-gradient(180deg,#e2573f,#c03a24); color:#fff;
+        display:flex; align-items:center; justify-content:center;
+        box-shadow:inset 0 1px 0 rgba(255,255,255,.28), 0 1px 3px rgba(0,0,0,.3);
+      }
+      .appbtn:hover{ filter:brightness(1.12); }
+      .appbtn svg{ width:21px; height:21px; }
+      .qatbtn{
+        width:30px; height:30px; flex:none; display:flex; align-items:center; justify-content:center;
+        background:none; border:1px solid transparent; border-radius:4px; cursor:pointer; color:var(--ink);
+      }
+      .qatbtn:hover{ background:var(--btn-hover); border-color:var(--line); }
+      .qatbtn svg{ width:17px; height:17px; }
+      .qatsep{ width:1px; height:20px; background:var(--line); margin:0 3px; flex:none; }
+      .ws-label{ font-size:12.5px; color:var(--ink-dim); white-space:nowrap; }
+      .menu.appmenu{ min-width:262px; }
+      .menu .mhead{ padding:6px 9px 2px; font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-dim); }
+
+      .filetabs{
+        display:flex; align-items:flex-end; gap:3px; padding:4px 8px 0;
+        background:var(--ribbon); border-bottom:1px solid var(--line); z-index:29;
+      }
+      .ftab{
+        display:flex; align-items:center; gap:7px; padding:5px 8px 6px 12px; max-width:280px;
+        background:var(--panel); border:1px solid var(--line); border-bottom:none;
+        border-radius:6px 6px 0 0; font-size:12.5px; color:var(--ink);
+      }
+      .ftab .fname{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+      .ftab .fx{ background:none; border:none; color:var(--ink-dim); cursor:pointer; font-size:14px; padding:0 3px; line-height:1; }
+      .ftab .fx:hover{ color:var(--ink); }
+      .ftab-add{
+        background:none; border:1px solid transparent; color:var(--ink-dim); cursor:pointer;
+        font-size:15px; padding:2px 8px 4px; border-radius:5px; line-height:1;
+      }
+      .ftab-add:hover{ background:var(--panel2); color:var(--ink); }
+
+      .rpanel-cap .launch{
+        position:absolute; right:3px; bottom:0; font-size:9px; color:var(--ink-dim);
+        cursor:pointer; padding:1px 2px; line-height:1;
+      }
+      .rpanel-cap .launch:hover{ color:var(--accent); }
+      .rtabs{ align-items:center; }
+      .rib-tools{ margin-left:auto; display:flex; align-items:center; gap:2px; }
+      .rib-min-btn{
+        background:none; border:1px solid transparent; border-radius:4px; color:var(--ink-dim);
+        cursor:pointer; font-size:11px; padding:3px 7px; white-space:nowrap;
+      }
+      .rib-min-btn:hover{ background:var(--panel2); color:var(--ink); }
+      .ribbon[data-min="panels"] .rpanel-tools{ display:none; }
+      .ribbon[data-min="panels"] .rbody{ padding-top:2px; }
+      .ribbon[data-min="tabs"] .rbody{ display:none !important; }
+
+      .layercombo{ display:flex; align-items:center; gap:6px; padding:2px 0; }
+      .layercombo .sw{ width:14px; height:14px; border-radius:3px; border:1px solid var(--line); flex:none; }
+      select.ribbon-sel{
+        background:var(--field); color:var(--ink); border:1px solid var(--line); border-radius:4px;
+        font-size:12.5px; padding:4px 5px; max-width:158px;
+      }
+
+      .viewcube{
+        position:absolute; top:10px; right:12px; z-index:8;
+        display:flex; flex-direction:column; align-items:center; gap:3px; user-select:none;
+      }
+      .vc-cube{ width:54px; height:54px; cursor:pointer; opacity:.92; display:block; }
+      .vc-cube:hover{ opacity:1; }
+      .vc-home{
+        font-size:9px; letter-spacing:.08em; color:var(--ink-dim); background:var(--panel);
+        border:1px solid var(--line); border-radius:3px; padding:1px 6px; cursor:pointer; font-family:inherit;
+      }
+      .vc-home:hover{ color:var(--ink); border-color:var(--accent); }
+
+      .navbar{
+        position:absolute; top:50%; right:10px; transform:translateY(-50%); z-index:9;
+        display:flex; flex-direction:column; background:var(--panel); border:1px solid var(--line);
+        border-radius:7px; overflow:hidden; box-shadow:0 6px 18px rgba(0,0,0,.3);
+      }
+      .navbar button{
+        width:30px; height:30px; display:flex; align-items:center; justify-content:center;
+        background:none; border:none; border-bottom:1px solid var(--line);
+        color:var(--ink-dim); cursor:pointer; font-size:14px; padding:0;
+      }
+      .navbar button:last-child{ border-bottom:none; }
+      .navbar button:hover{ background:var(--btn-hover); color:var(--ink); }
+      .navbar button.active{ color:var(--accent); }
+      .navbar button svg{ width:16px; height:16px; }
+
+      .statusbar .pill{ border-radius:3px; font-size:11px; letter-spacing:.03em; }
+      .sbsep{ width:1px; height:18px; background:var(--line); flex:none; }
+      .modelchip{ font-weight:700; letter-spacing:.05em; }
+      .statusbar.sb-compact #objCount, .statusbar.sb-compact #zoomReadout{ display:none; }
+      .panel.closed{ display:none; }
+      @media (max-width:840px){
+        .viewcube{ display:none; }
+        .ws-label{ display:none; }
+        .navbar{ top:auto; bottom:66px; transform:none; }
+        .ftab{ max-width:55vw; }
+      }
+
+      /* ---------- ribbon density: panels size to content and wrap as
+         whole panels (AutoCAD collapses panels rather than crushing
+         them); tighter tools so the full Home tab fits desktop widths */
+      .rpanel{ flex:none; max-width:342px; }
+      .rbody.active{ flex-wrap:wrap; row-gap:4px; }
+      .rtool{ width:48px; }
+      .rtool svg{ width:20px; height:20px; }
+      .rtool .rl{ font-size:9.5px; }
+      select.ribbon-sel{ max-width:118px; }
+      @media (max-width:840px){
+        .qat{ flex-wrap:wrap; padding:5px 7px; gap:5px; }
+        .qat .group{ flex-wrap:nowrap; }
+        .doc-name{ max-width:88px; min-width:64px; font-size:12.5px; }
+        .rtab{ padding:4px 9px; font-size:12px; }
+        .rtool{ width:42px; }
+        .rpanel{ padding:0 6px 1px; max-width:100%; }
+        /* the ribbon scrolls vertically within a capped band so the
+           command line and status bar always stay on screen */
+        .rbody.active{ max-height:29vh; overflow-y:auto; }
+        .cmd-history{ max-height:42px; }
+        .statusbar{ gap:6px; padding:4px 8px; font-size:11.5px; }
+        .statusbar .pill{ padding:1px 6px; font-size:10.5px; }
+        .statusbar .coords{ min-width:0; }
+        .layout-tabs{ padding:3px 7px 0; }
+        .ltab{ padding:4px 10px; font-size:12px; }
+      }
     </style>
   </head>
   <body>
     <header class="qat">
-      <div class="group">
-        <div class="menu-wrap">
-          <button class="btn" id="fileBtn">File ▾</button>
-          <div class="menu" id="fileMenu">
-            <button id="mNew">New drawing <span class="kbd">clears canvas</span></button>
-            <button id="mOpen">Open drawing (.json)</button>
-            <button id="mSaveDxf">Save <span class="kbd">Ctrl+S · AutoCAD .dxf</span></button>
-            <button id="mSave">Save as .json <span class="kbd">editable here</span></button>
-            <hr />
-            <button id="mImportDxf">Import DXF…</button>
-            <button id="mImportImg">Import background image…</button>
-            <hr />
-            <button id="mSample">Load sample cabinet run</button>
-            <hr />
-            <button id="mTemplates">New from template…</button>
-            <button id="mSaveTemplate">Save setup as template…</button>
-          </div>
-        </div>
-        <div class="menu-wrap">
-          <button class="btn" id="exportBtn">Export ▾</button>
-          <div class="menu" id="exportMenu">
-            <button id="mDxf">DXF (AutoCAD)</button>
-            <button id="mSvg">SVG</button>
-            <button id="mPng">PNG image</button>
-            <hr />
-            <button id="mPdf">Layout sheet (PDF)</button>
-            <button id="mSheetPng">Layout sheet (PNG)</button>
-          </div>
+      <div class="menu-wrap">
+        <button class="appbtn" id="fileBtn" title="Application menu" aria-label="Application menu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.1" stroke-linecap="square"><path d="M4 20L12 4l8 16M7.2 14h9.6"/></svg>
+        </button>
+        <div class="menu appmenu" id="fileMenu">
+          <div class="mhead">Drawing</div>
+          <button id="mNew">New drawing <span class="kbd">clears canvas</span></button>
+          <button id="mOpen">Open drawing (.json)</button>
+          <button id="mSaveDxf">Save <span class="kbd">Ctrl+S · AutoCAD .dxf</span></button>
+          <button id="mSave">Save as .json <span class="kbd">editable here</span></button>
+          <hr />
+          <div class="mhead">Import</div>
+          <button id="mImportDxf">Import DXF…</button>
+          <button id="mImportImg">Import background image…</button>
+          <hr />
+          <div class="mhead">Start from</div>
+          <button id="mSample">Load sample cabinet run</button>
+          <button id="mTemplates">New from template…</button>
+          <button id="mSaveTemplate">Save setup as template…</button>
         </div>
       </div>
-      <div class="sep"></div>
+      <div class="group">
+        <button class="qatbtn" id="qatNew" title="New drawing"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></svg></button>
+        <button class="qatbtn" id="qatOpen" title="Open drawing (.json)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></button>
+        <button class="qatbtn" id="qatSave" title="Save (Ctrl+S) — AutoCAD .dxf"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 4h11l3 3v13H5z"/><path d="M8 4v5h7V4M8 20v-6h8v6"/></svg></button>
+        <button class="qatbtn" id="qatSaveAs" title="Save as .json"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 4h11l3 3v13H5z"/><path d="M8 4v5h7V4M17.5 15.5l3 3m0-3l-3 3" stroke-linecap="round"/></svg></button>
+      </div>
+      <div class="qatsep"></div>
       <div class="group">
         <button class="btn icon" id="undoBtn" title="Undo (Ctrl+Z)">↩</button>
         <button class="btn icon" id="redoBtn" title="Redo (Ctrl+Y)">↪</button>
       </div>
       <input class="doc-name" id="docName" value="Untitled drawing" aria-label="Drawing name" />
       <div style="flex:1"></div>
+      <span class="ws-label">Drafting &amp; Annotation</span>
       <button class="btn icon" id="themeBtn" title="Interface theme — dark (AutoCAD default) or light">◐</button>
-      <button class="btn" id="panelBtn" title="Layers &amp; properties panel">☰ Panel</button>
+      <button class="btn" id="panelBtn" title="Layers &amp; properties palette">☰ Panel</button>
       <button class="btn" id="fitBtn" title="Zoom extents (Shift+F)">Fit</button>
       <button class="btn" id="helpBtn">Help</button>
     </header>
@@ -407,31 +533,119 @@
         <button class="rtab active" data-rtab="home" role="tab">Home</button>
         <button class="rtab" data-rtab="insert" role="tab">Insert</button>
         <button class="rtab" data-rtab="annotate" role="tab">Annotate</button>
+        <button class="rtab" data-rtab="parametric" role="tab">Parametric</button>
         <button class="rtab" data-rtab="view" role="tab">View</button>
+        <button class="rtab" data-rtab="manage" role="tab">Manage</button>
+        <button class="rtab" data-rtab="output" role="tab">Output</button>
+        <button class="rtab" data-rtab="addins" role="tab">Add-ins</button>
+        <button class="rtab" data-rtab="collaborate" role="tab">Collaborate</button>
+        <button class="rtab" data-rtab="featured" role="tab">Featured Apps</button>
+        <button class="rtab" data-rtab="express" role="tab">Express Tools</button>
+        <span class="rib-tools">
+          <button class="rib-min-btn" id="ribMinBtn" title="Minimize the ribbon — cycles full ribbon → panel titles → tabs only (AutoCAD's ribbon cycle)">⌃ Minimize</button>
+        </span>
       </div>
       <div class="rbody active" data-rbody="home">
         <div class="rpanel">
           <div class="rpanel-tools" id="panelDraw"></div>
-          <div class="rpanel-cap">Draw</div>
+          <div class="rpanel-cap">Draw<span class="launch" data-launch="ds" title="Drafting settings">↘</span></div>
         </div>
         <div class="rpanel">
           <div class="rpanel-tools" id="panelModify"></div>
           <div class="rpanel-cap">Modify</div>
         </div>
         <div class="rpanel">
+          <div class="rpanel-tools" id="panelModifySm">
+            <button class="rbtn-sm" id="delBtn" title="Erase (E)">Erase</button>
+          </div>
+          <div class="rpanel-cap">&nbsp;</div>
+        </div>
+        <div class="rpanel">
+          <div class="rpanel-tools" id="panelAnnotate"></div>
+          <div class="rpanel-cap">Annotation<span class="launch" data-launch="dimstyle" title="Dimension Style Manager">↘</span></div>
+        </div>
+        <div class="rpanel">
           <div class="rpanel-tools">
             <div class="rstack">
-              <button class="rbtn-sm" id="dupBtn" title="Duplicate (Ctrl+D)">Duplicate</button>
-              <button class="rbtn-sm" id="delBtn" title="Delete (Del)">Delete</button>
+              <button class="rbtn-sm" id="layerPropsBtn" title="Layer Properties (LA)">Layer Properties</button>
+              <div class="layercombo">
+                <span class="sw" id="layerSwatch"></span>
+                <select class="ribbon-sel" id="layerCombo" title="Current layer — pick to make a layer current"></select>
+              </div>
             </div>
           </div>
-          <div class="rpanel-cap">Edit</div>
+          <div class="rpanel-cap">Layers<span class="launch" data-launch="layers" title="Layers palette">↘</span></div>
+        </div>
+        <div class="rpanel">
+          <div class="rpanel-tools">
+            <div class="rstack">
+              <button class="rbtn-sm" id="blockInsertBtn" title="Insert — blocks, references and content live on the Insert tab">Insert…</button>
+              <button class="rbtn-sm" id="blockSampleBtn" title="Insert the sample cabinet run">Sample run</button>
+            </div>
+          </div>
+          <div class="rpanel-cap">Block<span class="launch" data-launch="inserttab" title="Open the Insert tab">↘</span></div>
+        </div>
+        <div class="rpanel">
+          <div class="rpanel-tools">
+            <div class="rpanel-tools" id="panelProps"></div>
+            <div class="rstack">
+              <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-dim)">Color
+                <input type="color" id="propColor" value="#e8e8e8" style="width:34px;height:24px;padding:1px;border:1px solid var(--line);border-radius:4px;background:var(--field)" />
+              </label>
+              <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-dim)"><input type="checkbox" id="propByLayer" checked /> ByLayer</label>
+            </div>
+          </div>
+          <div class="rpanel-cap">Properties<span class="launch" data-launch="props" title="Properties palette">↘</span></div>
+        </div>
+        <div class="rpanel">
+          <div class="rpanel-tools">
+            <div class="rstack">
+              <button class="rbtn-sm" id="grpBtn" title="Group (G) — bind the selected objects so they select and move as one">Group</button>
+              <button class="rbtn-sm" id="ungrpBtn" title="Ungroup — release the selected group">Ungroup</button>
+            </div>
+          </div>
+          <div class="rpanel-cap">Groups</div>
+        </div>
+        <div class="rpanel">
+          <div class="rpanel-tools">
+            <div class="rstack">
+              <button class="rbtn-sm" id="utilDist" title="Distance (DI)">Distance</button>
+              <button class="rbtn-sm" id="utilArea" title="Area (AA)">Area</button>
+            </div>
+            <div class="rstack">
+              <button class="rbtn-sm" id="utilId" title="ID point (ID)">ID Point</button>
+              <button class="rbtn-sm" id="utilList" title="List (LI) — report the selection in the command window">List</button>
+            </div>
+          </div>
+          <div class="rpanel-cap">Utilities</div>
+        </div>
+        <div class="rpanel">
+          <div class="rpanel-tools">
+            <div class="rstack">
+              <button class="rbtn-sm" id="clipCut" title="Cut (Ctrl+X)">Cut</button>
+              <button class="rbtn-sm" id="clipCopy" title="Copy (Ctrl+C)">Copy</button>
+            </div>
+            <div class="rstack">
+              <button class="rbtn-sm" id="clipPaste" title="Paste (Ctrl+V)">Paste</button>
+              <button class="rbtn-sm" id="dupBtn" title="Duplicate (Ctrl+D)">Duplicate</button>
+            </div>
+          </div>
+          <div class="rpanel-cap">Clipboard</div>
+        </div>
+        <div class="rpanel">
+          <div class="rpanel-tools">
+            <div class="rpanel-tools" id="panelHomeView"></div>
+            <div class="rstack">
+              <button class="rbtn-sm" id="homeFitBtn" title="Zoom Extents (Z E)">Zoom Extents</button>
+            </div>
+          </div>
+          <div class="rpanel-cap">View<span class="launch" data-launch="viewtab" title="Open the View tab">↘</span></div>
         </div>
       </div>
       <div class="rbody" data-rbody="insert">
         <div class="rpanel">
           <div class="rpanel-tools" id="panelInsert"></div>
-          <div class="rpanel-cap">Insert</div>
+          <div class="rpanel-cap">Block</div>
         </div>
         <div class="rpanel">
           <div class="rpanel-tools">
@@ -439,19 +653,163 @@
               <button class="rbtn-sm" id="insDxf">Import DXF…</button>
               <button class="rbtn-sm" id="insImg">Import background image…</button>
             </div>
+          </div>
+          <div class="rpanel-cap">Reference</div>
+        </div>
+        <div class="rpanel">
+          <div class="rpanel-tools">
             <div class="rstack">
               <button class="rbtn-sm" id="insSample">Sample cabinet run</button>
               <button class="rbtn-sm" id="insTpl">New from template…</button>
               <button class="rbtn-sm" id="insSaveTpl">Save setup as template…</button>
             </div>
           </div>
-          <div class="rpanel-cap">Import</div>
+          <div class="rpanel-cap">Content</div>
+        </div>
+      </div>
+      <div class="rbody" data-rbody="parametric">
+        <div class="rpanel">
+          <div class="rpanel-tools">
+            <div class="rstack">
+              <button class="rbtn-sm" id="paraOrtho" title="Ortho mode (F8)">Ortho</button>
+              <button class="rbtn-sm" id="paraPolar" title="Polar tracking (F10)">Polar Tracking</button>
+            </div>
+          </div>
+          <div class="rpanel-cap">Geometric</div>
+        </div>
+        <div class="rpanel">
+          <div class="rpanel-tools">
+            <div class="rstack">
+              <button class="rbtn-sm" id="paraDimLin" title="Linear dimension (DLI)">Linear</button>
+              <button class="rbtn-sm" id="paraDimAli" title="Aligned dimension (DAL)">Aligned</button>
+            </div>
+            <div class="rstack">
+              <button class="rbtn-sm" id="paraDimAng" title="Angular dimension (DAN)">Angular</button>
+              <button class="rbtn-sm" id="paraDimRad" title="Radius dimension (DRA)">Radius</button>
+              <button class="rbtn-sm" id="paraDimDia" title="Diameter dimension (DDI)">Diameter</button>
+            </div>
+          </div>
+          <div class="rpanel-cap">Dimensional</div>
+        </div>
+      </div>
+      <div class="rbody" data-rbody="manage">
+        <div class="rpanel">
+          <div class="rpanel-tools">
+            <div class="rstack">
+              <button class="rbtn-sm" id="mgDsBtn" title="Drafting Settings (DS)">Drafting Settings</button>
+              <button class="rbtn-sm" id="mgDimStyleBtn" title="Dimension Style Manager (D)">Dimension Styles</button>
+            </div>
+            <div class="rstack">
+              <button class="rbtn-sm" id="mgLayersBtn" title="Layers (LA)">Layers</button>
+              <button class="rbtn-sm" id="mgUnitsBtn" title="Units (UN) — set on the View tab">Units</button>
+            </div>
+          </div>
+          <div class="rpanel-cap">Settings</div>
+        </div>
+        <div class="rpanel">
+          <div class="rpanel-tools">
+            <div class="rstack">
+              <button class="rbtn-sm" id="mgPropsBtn" title="Properties palette (PR)">Properties</button>
+              <button class="rbtn-sm" id="mgPanelBtn" title="Show or hide the Layers / Properties palette">Palettes</button>
+            </div>
+          </div>
+          <div class="rpanel-cap">Customization</div>
+        </div>
+      </div>
+      <div class="rbody" data-rbody="output">
+        <div class="rpanel">
+          <div class="rpanel-tools">
+            <div class="menu-wrap">
+              <button class="btn" id="exportBtn">Export ▾</button>
+              <div class="menu" id="exportMenu">
+                <button id="mDxf">DXF (AutoCAD)</button>
+                <button id="mSvg">SVG</button>
+                <button id="mPng">PNG image</button>
+              </div>
+            </div>
+          </div>
+          <div class="rpanel-cap">Export</div>
+        </div>
+        <div class="rpanel">
+          <div class="rpanel-tools">
+            <div class="rstack">
+              <button class="rbtn-sm" id="mPdf" title="Plot the active layout sheet to PDF">Plot sheet (PDF)</button>
+              <button class="rbtn-sm" id="mSheetPng" title="Plot the active layout sheet to PNG">Plot sheet (PNG)</button>
+            </div>
+          </div>
+          <div class="rpanel-cap">Plot</div>
+        </div>
+      </div>
+      <div class="rbody" data-rbody="addins">
+        <div class="rpanel">
+          <div class="rpanel-tools">
+            <div class="rstack">
+              <button class="rbtn-sm" id="addSampleBtn">Sample cabinet run</button>
+              <button class="rbtn-sm" id="addTplBtn">New from template…</button>
+              <button class="rbtn-sm" id="addSaveTplBtn">Save setup as template…</button>
+            </div>
+          </div>
+          <div class="rpanel-cap">Content</div>
+        </div>
+      </div>
+      <div class="rbody" data-rbody="collaborate">
+        <div class="rpanel">
+          <div class="rpanel-tools">
+            <div class="rstack">
+              <button class="rbtn-sm" id="colSaveBtn" title="Save as AutoCAD .dxf (Ctrl+S)">Save drawing (.dxf)</button>
+              <button class="rbtn-sm" id="colSaveJsonBtn" title="Save as .json — reopens here for editing">Save as .json</button>
+              <button class="rbtn-sm" id="colOpenBtn" title="Open a drawing (.json)">Open drawing…</button>
+            </div>
+          </div>
+          <div class="rpanel-cap">Share</div>
+        </div>
+      </div>
+      <div class="rbody" data-rbody="featured">
+        <div class="rpanel">
+          <div class="rpanel-tools">
+            <div class="rstack">
+              <button class="rbtn-sm" id="featHelpBtn">Help &amp; shortcuts</button>
+              <button class="rbtn-sm" id="featThemeBtn">Light / dark theme</button>
+            </div>
+          </div>
+          <div class="rpanel-cap">Featured</div>
+        </div>
+      </div>
+      <div class="rbody" data-rbody="express">
+        <div class="rpanel">
+          <div class="rpanel-tools">
+            <div class="rstack">
+              <button class="rbtn-sm" id="expDist" title="Distance (DI)">Distance</button>
+              <button class="rbtn-sm" id="expArea" title="Area (AA)">Area</button>
+              <button class="rbtn-sm" id="expId" title="ID point (ID)">ID Point</button>
+            </div>
+            <div class="rstack">
+              <button class="rbtn-sm" id="expList" title="List (LI)">List</button>
+              <button class="rbtn-sm" id="expOops" title="OOPS — restore the last erased objects">Oops</button>
+              <button class="rbtn-sm" id="expRegen" title="Regen (RE)">Regen</button>
+            </div>
+          </div>
+          <div class="rpanel-cap">Tools</div>
         </div>
       </div>
       <div class="rbody" data-rbody="annotate">
         <div class="rpanel">
-          <div class="rpanel-tools" id="panelAnnotate"></div>
-          <div class="rpanel-cap">Annotation</div>
+          <div class="rpanel-tools" id="panelAnnText"></div>
+          <div class="rpanel-cap">Text</div>
+        </div>
+        <div class="rpanel">
+          <div class="rpanel-tools">
+            <div class="rpanel-tools" id="panelAnnDim"></div>
+            <div class="rstack">
+              <button class="rbtn-sm" id="dimAlignedBtn" title="Aligned dimension (DAL)">Aligned dim</button>
+              <button class="rbtn-sm" id="dimRadiusBtn" title="Radius dimension (DRA)">Radius dim</button>
+            </div>
+            <div class="rstack">
+              <button class="rbtn-sm" id="dimDiaBtn" title="Diameter dimension (DDI)">Diameter dim</button>
+              <button class="rbtn-sm" id="dimAngBtn" title="Angular dimension (DAN)">Angular dim</button>
+            </div>
+          </div>
+          <div class="rpanel-cap">Dimensions<span class="launch" data-launch="dimstyle" title="Dimension Style Manager">↘</span></div>
         </div>
         <div class="rpanel">
           <div class="rpanel-tools">
@@ -459,14 +817,8 @@
               <button class="rbtn-sm" id="dimStyleBtn" title="Dimension styles (DIMSTYLE)">Dimension styles…</button>
               <button class="rbtn-sm" id="annLayers">Layers panel</button>
             </div>
-            <div class="rstack">
-              <button class="rbtn-sm" id="dimAlignedBtn" title="Aligned dimension (DAL)">Aligned dim</button>
-              <button class="rbtn-sm" id="dimRadiusBtn" title="Radius dimension (DRA)">Radius dim</button>
-              <button class="rbtn-sm" id="dimDiaBtn" title="Diameter dimension (DDI)">Diameter dim</button>
-              <button class="rbtn-sm" id="dimAngBtn" title="Angular dimension (DAN)">Angular dim</button>
-            </div>
           </div>
-          <div class="rpanel-cap">Dimensions</div>
+          <div class="rpanel-cap">Styles</div>
         </div>
       </div>
       <div class="rbody" data-rbody="view">
@@ -547,17 +899,46 @@
       </div>
     </div>
 
+    <div class="filetabs" id="fileTabs">
+      <div class="ftab" id="ftabMain" title="Current drawing">
+        <span class="fname" id="ftabName">Untitled drawing</span>
+        <button class="fx" id="ftabClose" title="Close — start a new drawing">×</button>
+      </div>
+      <button class="ftab-add" id="ftabAdd" title="New drawing">+</button>
+    </div>
+
     <div class="workspace">
       <div class="canvas-wrap" id="canvasWrap">
         <canvas id="cv"></canvas>
         <div class="ucs-icon" aria-hidden="true">
-          <svg width="54" height="54" viewBox="0 0 54 54" fill="none" stroke="currentColor" stroke-width="1.6">
-            <path d="M15 39 L15 17 M15 39 L37 39" />
-            <path d="M15 12 l-3.2 6.4 h6.4 z" fill="currentColor" stroke="none" />
-            <path d="M42 39 l-6.4 -3.2 v6.4 z" fill="currentColor" stroke="none" />
-            <text x="19" y="17" fill="currentColor" stroke="none" font-size="9" font-family="inherit">Y</text>
-            <text x="33" y="33" fill="currentColor" stroke="none" font-size="9" font-family="inherit">X</text>
+          <svg width="56" height="56" viewBox="0 0 56 56" fill="none" stroke-width="1.7">
+            <path d="M16 40 L16 16" stroke="#3fb950" />
+            <path d="M16 40 L40 40" stroke="#e5484d" />
+            <path d="M16 11 l-3.4 6.8 h6.8 z" fill="#3fb950" stroke="none" />
+            <path d="M45 40 l-6.8 -3.4 v6.8 z" fill="#e5484d" stroke="none" />
+            <rect x="12.5" y="36.5" width="7" height="7" fill="none" stroke="#aeb6c0" stroke-width="1.2" />
+            <text x="20" y="17" fill="#3fb950" stroke="none" font-size="9">Y</text>
+            <text x="34" y="34" fill="#e5484d" stroke="none" font-size="9">X</text>
+            <text x="24" y="50" fill="#aeb6c0" stroke="none" font-size="7.5">WORLD</text>
           </svg>
+        </div>
+        <div class="viewcube" id="viewCube" aria-hidden="true">
+          <svg class="vc-cube" id="vcCube" viewBox="0 0 60 60">
+            <title>ViewCube — click for Zoom Extents (Home)</title>
+            <polygon points="30,6 52,18 30,30 8,18" fill="#4a5058" stroke="#8a939e" stroke-width="1"/>
+            <polygon points="8,18 30,30 30,54 8,42" fill="#33373d" stroke="#8a939e" stroke-width="1"/>
+            <polygon points="52,18 30,30 30,54 52,42" fill="#3d4148" stroke="#8a939e" stroke-width="1"/>
+            <text x="30" y="21" fill="#e9ebef" font-size="8.5" text-anchor="middle" font-family="inherit">TOP</text>
+            <text x="17" y="40" fill="#a6adb6" font-size="7" text-anchor="middle" font-family="inherit">W</text>
+            <text x="43" y="40" fill="#a6adb6" font-size="7" text-anchor="middle" font-family="inherit">E</text>
+          </svg>
+          <button class="vc-home" id="vcHome" title="Home view — Zoom Extents">HOME</button>
+        </div>
+        <div class="navbar" id="navBar">
+          <button id="navPan" title="Pan (P) — drag to pan the view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v18M3 12h18M12 3l-2.5 2.5M12 3l2.5 2.5M12 21l-2.5-2.5M12 21l2.5-2.5M3 12l2.5-2.5M3 12l2.5 2.5M21 12l-2.5-2.5M21 12l-2.5 2.5"/></svg></button>
+          <button id="navFit" title="Zoom Extents (Z E)">⌂</button>
+          <button id="zoomIn" title="Zoom in">+</button>
+          <button id="zoomOut" title="Zoom out">−</button>
         </div>
         <div class="text-editor" id="textEditor">
           <textarea id="textEditorInput" placeholder="Type text…"></textarea>
@@ -565,10 +946,6 @@
             <button class="btn" id="textOk">Place text</button>
             <button class="btn" id="textCancel">Cancel</button>
           </div>
-        </div>
-        <div class="canvas-float">
-          <button class="btn icon" id="zoomOut" title="Zoom out">−</button>
-          <button class="btn icon" id="zoomIn" title="Zoom in">+</button>
         </div>
         <div class="dyn-box" id="dynBox">
           <span class="dyn-label" id="dynLabel">Length</span>
@@ -654,19 +1031,24 @@
     </div>
 
     <footer class="statusbar">
-      <span class="coords mono" id="coordReadout" title="Coordinates — click to cycle display mode">X 0 · Y 0</span>
-      <span class="hint" id="toolHint">Select a tool to start drawing.</span>
-      <span class="right">
-        <button class="pill" id="snapPill" title="Snap mode (F9)">SNAP</button>
-        <button class="pill" id="gridPill" title="Grid display (F7)">GRID</button>
-        <button class="pill" id="orthoPill" title="Ortho mode (F8)">ORTHO</button>
-        <button class="pill" id="polarPill" title="Polar tracking (F10)">POLAR</button>
-        <button class="pill" id="otrackPill" title="Object snap tracking (F11)">OTRACK</button>
-        <button class="pill" id="osnapPill" title="Object snap (F3) — right-click for modes">OSNAP</button>
-        <button class="pill" id="dynPill" title="Dynamic input (F12)">DYN</button>
-        <span id="objCount">0 objects</span>
-        <span class="mono" id="zoomReadout">100%</span>
-      </span>
+      <span class="coords mono" id="coordReadout" title="Coordinates — click to cycle display mode (F6)">X 0 · Y 0</span>
+      <button class="pill modelchip" id="modelChip" title="Model / paper space — click to return to Model">MODEL</button>
+      <span class="sbsep"></span>
+      <span class="hint" id="toolHint" style="display:none">Select a tool to start drawing.</span>
+      <button class="pill" id="snapPill" title="Snap mode (F9)">SNAP</button>
+      <button class="pill" id="gridPill" title="Grid display (F7)">GRID</button>
+      <button class="pill" id="orthoPill" title="Ortho mode (F8)">ORTHO</button>
+      <button class="pill" id="polarPill" title="Polar tracking (F10) — right-click for angle settings">POLAR</button>
+      <button class="pill" id="isoPill" title="Isometric drafting (F5 cycles the isoplane: Left / Top / Right)">ISO</button>
+      <button class="pill" id="otrackPill" title="Object snap tracking (F11)">OTRACK</button>
+      <button class="pill" id="osnapPill" title="Object snap (F3) — right-click for modes">OSNAP</button>
+      <button class="pill" id="lwtPill" title="Lineweight display (LWDISPLAY)">LWT</button>
+      <button class="pill" id="selCyclePill" title="Selection cycling (Ctrl+W)">SELCYC</button>
+      <button class="pill" id="dynPill" title="Dynamic input (F12)">DYN</button>
+      <span style="flex:1"></span>
+      <span id="objCount">0 objects</span>
+      <span class="mono" id="zoomReadout">100%</span>
+      <button class="pill" id="sbMenuBtn" title="Status bar customization — show or hide the readouts">☰</button>
     </footer>
 
     <div class="ctx-menu" id="ctxMenu" role="menu" aria-label="Context menu"></div>
@@ -674,10 +1056,10 @@
     <div class="overlay" id="helpOverlay">
       <div class="dialog">
         <h2>2D Drafting — quick reference</h2>
-        <p>Feet–inches (architectural) is the default: readouts, typed input and dimensions all speak ft-in like <span class="mono">10'6"</span> or <span class="mono">1'6 1/2"</span>. Metric stays under Units. The ribbon works like AutoCAD's (Home / Insert / Annotate / View tabs), the UI ships in the dark theme (◐ in the top bar flips it light), and the command window at the bottom keeps a scrolling history with autocomplete: start typing and matching commands drop down (↑/↓ + Enter picks, ↑/↓ on an empty line recalls recent commands, <span class="mono">F2</span> opens the full history, <span class="mono">Ctrl+9</span> hides the window). While any command runs, type exact values in the floating box (Tab switches fields, Enter confirms) or in the command line — <span class="mono">Esc</span> always cancels back to Select, and right-click pops the current command's options (idle right-click repeats the last command). Aliases follow AutoCAD exactly (C Circle · REC Rectangle · EL Ellipse · E Erase · R Redraw · D Dimstyle · DI Distance · CO Copy · X Explode): just start typing anywhere and the keys land in the command line — Enter runs exactly what you typed, nothing is guessed.</p>
+        <p>Feet–inches (architectural) is the default: readouts, typed input and dimensions all speak ft-in like <span class="mono">10'6"</span> or <span class="mono">1'6 1/2"</span>. Metric stays under Units. The ribbon mirrors AutoCAD 2026 (Home / Insert / Annotate / Parametric / View / Manage / Output / Add-ins / Collaborate / Featured Apps / Express Tools tabs, with Draw · Modify · Annotation · Layers · Block · Properties · Groups · Utilities · Clipboard · View panels on Home, a red A application menu, the drawing's file tab underneath, and the ⌃ Minimize button cycling the ribbon like AutoCAD), the UI ships in the dark theme (◐ in the top bar flips it light), and the command window at the bottom keeps a scrolling history with autocomplete: start typing and matching commands drop down (↑/↓ + Enter picks, ↑/↓ on an empty line recalls recent commands, <span class="mono">F2</span> opens the full history, <span class="mono">Ctrl+9</span> hides the window). While any command runs, type exact values in the floating box (Tab switches fields, Enter confirms) or in the command line — <span class="mono">Esc</span> always cancels back to Select, and right-click pops the current command's options (idle right-click repeats the last command). Aliases follow AutoCAD exactly (C Circle · REC Rectangle · EL Ellipse · E Erase · R Redraw · D Dimstyle · DI Distance · CO Copy · X Explode): just start typing anywhere and the keys land in the command line — Enter runs exactly what you typed, nothing is guessed.</p>
         <table>
           <tr><td class="mono">L / PL / SPL / REC / C / A / EL / POL / DO / XL</td><td>Line (keeps going segment after segment; U undoes one, C closes) · Polyline · Spline (smooth curve through the points; C closes) · Rectangle (right-click for Chamfer/Fillet corners) · Circle · Arc (3-point, right-click for Center) · Ellipse · Polygon · Donut (inside/outside diameters, then a ring per click) · Construction line (infinite guide through two points)</td></tr>
-          <tr><td class="mono">M · CO · RO · SC · MI · ST · O · TR · EX · F · CHA · AR · X · J · BR · DIV · ME · LEN · AL · H · MA</td><td>Move · Copy · Rotate · Scale · Mirror (asks Erase source? [Yes/No] &lt;N&gt;) · Stretch (crossing window first: geometry inside the window moves, the rest stays) · Offset (copies toward the side you click) · Trim (Quick mode: everything cuts, Shift+click extends, type T for cutting edges) · Extend (Shift+click trims) · Fillet · Chamfer · Array · Explode · Join · Break · Divide (equal segments) · Measure (points every typed length) · Lengthen (DElta/Total, then click near an end) · Align (2 source→destination point pairs, optional scale) · Hatch · Match properties</td></tr>
+          <tr><td class="mono">M · CO · RO · SC · MI · ST · O · TR · EX · F · CHA · AR · X · J · BR · DIV · ME · LEN · AL · H · MA · G</td><td>Move · Copy · Rotate · Scale · Mirror (asks Erase source? [Yes/No] &lt;N&gt;) · Stretch (crossing window first: geometry inside the window moves, the rest stays) · Offset (copies toward the side you click) · Trim (Quick mode: everything cuts, Shift+click extends, type T for cutting edges) · Extend (Shift+click trims) · Fillet · Chamfer · Array · Explode · Join · Break · Divide (equal segments) · Measure (points every typed length) · Lengthen (DElta/Total, then click near an end) · Align (2 source→destination point pairs, optional scale) · Hatch · Match properties · Group (G binds the selection so it picks and moves as one; UNGROUP releases it)</td></tr>
           <tr><td class="mono">E · R · U · OOPS · LI · DI · AA · ID</td><td>Erase the selection · Redraw · Undo (Ctrl+Z too) · OOPS restores the last erased objects · LIST reports the selection in the command window · DIstance / ARea / ID measure and report</td></tr>
           <tr><td class="mono">D · DS · LA · PR · UN</td><td>Dimension styles · Drafting settings (object-snap modes, tracking, dynamic input, lineweight display) · Layers panel · Properties panel · Units (View tab)</td></tr>
           <tr><td class="mono">F7 Grid · F9 Snap · F8 Ortho · F10 Polar · F3 OSnap · F11 OTrack · F12 Dyn · F2 History</td><td>Ortho locks horizontal/vertical (Shift temporarily inverts it); Polar snaps to the chosen increment plus your custom angles (View tab → Polar settings) with a dotted tracking path and tooltip; object snap finds endpoints, midpoints, centres, quadrants, intersections (nearest optional in DS); OTrack tracks horizontally/vertically from hovered snap points; the status-bar pills at bottom-right toggle the same aids</td></tr>
@@ -685,13 +1067,15 @@
           <tr><td class="mono">Window / Crossing</td><td>No holding the button: click one corner, move, click the opposite corner (press-and-drag still works too). Left→right (blue) selects fully-enclosed objects only; right→left (green dashed) selects anything touched. Works idle and at any "Select objects:" step (MOVE, COPY…); Esc cancels a half-built window</td></tr>
           <tr><td class="mono">Enter / Space</td><td>Space works exactly like Enter (AutoCAD-style): it runs a typed command, confirms typed values and selections, finishes polylines, and repeats the last command when idle. It only inserts a real space while typing actual text</td></tr>
           <tr><td class="mono">Command window</td><td>Drag the grip strip above the command line to show more or fewer history lines (double-click resets); the size is saved with the drawing. Zoom buttons and Fit glide smoothly; the object under the cursor highlights before you pick it</td></tr>
-          <tr><td class="mono">Dim styles</td><td>Top bar → Dim styles: arrowheads, text height/placement, ft-in/fractional/decimal precision, extension offsets. Changing a style restyles its dimensions</td></tr>
+          <tr><td class="mono">Dim styles</td><td>Annotate tab → Dimension styles…: arrowheads, text height/placement, ft-in/fractional/decimal precision, extension offsets. Changing a style restyles its dimensions</td></tr>
           <tr><td class="mono">Layouts</td><td>Tabs under the canvas: Model + sheets. Pick a paper size, draw viewports, set print scales like 1/4″=1′-0″, lock them, fill the title block, then Export → Layout sheet (PDF/PNG). Viewport borders never print</td></tr>
           <tr><td class="mono">Templates</td><td>File → New from template: Arch D / Arch C / Letter / A1 / A3 presets, plus Save setup as template for your own</td></tr>
           <tr><td class="mono">Ctrl+S · SAVE / QSAVE</td><td>Save the drawing as an AutoCAD-compatible .dxf (opens natively in AutoCAD; File → Save as .json keeps the editable app copy)</td></tr>
           <tr><td class="mono">Ctrl+Z / Ctrl+Y · Ctrl+D · Del · arrows</td><td>Undo / redo · duplicate · delete · nudge (Shift = ×10). Scroll zooms, middle-drag or the Pan tool pans, Shift+F fits</td></tr>
         </table>
         <p><strong>Save your work:</strong> File → Save (or Ctrl+S, or the SAVE command) writes an AutoCAD-compatible .dxf in one click — AutoCAD opens .dxf natively with geometry, layers and dimensions intact (true .dwg is Autodesk's proprietary format, which no browser app can author). File → Save as .json keeps a fully editable copy for this app (dim styles, layouts and templates too); reopen it with File → Open. Drawings live in this page only — save before closing the tab.</p>
+        <h3 style="margin:14px 0 6px;font-size:13px">Compatibility &amp; scope</h3>
+        <p style="font-size:12.5px">Reference version: AutoCAD 2026, 2D drafting scope. Explicitly deferred rather than approximated: the parametric constraint solver (the Parametric tab carries the dimensional commands only), the BLOCK / INSERT / ATTDEF block engine (GROUP/UNGROUP covers object sets), associative dimensions and hatches, and external references (XREF). A control is only shown when the command behind it works.</p>
         <div class="dlg-actions"><button class="btn" id="helpClose">Close</button></div>
       </div>
     </div>
@@ -931,6 +1315,7 @@
     };
     let settings = { unit:"ftin", gridSize:25.4, snap:true, osnap:true, gridVisible:true, bg:"dark",
                      otrack:false, selCycle:false, dynInput:true, lwDisplay:true, coordMode:0,
+                     iso:false, isoPlane:0,
                      osnapModes:{ end:true, mid:true, cen:true, int:true, qua:true, nea:false },
                      ortho:false, polar:true, polarAngle:45, polarCustom:[], cmdBarH:66 };
     let layers = [ { id:"L1", name:"Layer 1", color:"#e8e8e8", visible:true, locked:false } ];
@@ -2302,10 +2687,15 @@
       draw();
     }
     const RIBBON_GROUPS = {
-      panelDraw: ["select","pan","line","polyline","spline","rect","circle","arc","ellipse","polygon","donut","xline","point"],
-      panelModify: ["move","copy","rotate","scale","mirror","stretch","offset","trim","extend","fillet","chamfer","array","explode","join","break","divide","measure","lengthen","align","hatch","matchprop"],
+      panelDraw: ["line","polyline","circle","arc","rect","ellipse","polygon","spline","xline","donut","point","hatch"],
+      panelModify: ["move","copy","rotate","mirror","scale","stretch","trim","extend","fillet","chamfer","offset","array","explode"],
+      panelModifySm: ["align","break","join","lengthen","divide","measure"],
       panelAnnotate: ["text","dim"],
-      panelInsert: ["viewport"]
+      panelProps: ["matchprop"],
+      panelHomeView: ["select","pan"],
+      panelInsert: ["viewport"],
+      panelAnnText: ["text"],
+      panelAnnDim: ["dim"]
     };
     function buildRibbon(){
       const byId = {};
@@ -2359,6 +2749,21 @@
       const orthoOn = settings.ortho !== shiftDown;
       let dx = pt.x - anchor[0], dy = pt.y - anchor[1];
       if (Math.abs(dx) < 1e-9 && Math.abs(dy) < 1e-9) return pt;
+      if (settings.iso && !shiftDown){
+        // Isometric drafting: constrain to the current isoplane's two axes
+        // (Left: 90°/150°, Top: 30°/150°, Right: 30°/90°), in both directions.
+        const L = Math.hypot(dx, dy);
+        const planes = [[90, 150], [30, 150], [30, 90]];
+        const axes = planes[settings.isoPlane || 0] || planes[0];
+        const a = Math.atan2(dy, dx) * 180/Math.PI;
+        let best = axes[0], bd = 1e9;
+        axes.concat(axes.map(x=> x + 180)).forEach(ax=>{
+          const d = Math.abs(((a - ax + 540) % 360) - 180);
+          if (d < bd){ bd = d; best = ax; }
+        });
+        const r = best * Math.PI/180;
+        return { x: anchor[0] + L*Math.cos(r), y: anchor[1] + L*Math.sin(r) };
+      }
       if (orthoOn){
         if (Math.abs(dx) >= Math.abs(dy)) dy = 0; else dx = 0;
         return { x: anchor[0]+dx, y: anchor[1]+dy };
@@ -2771,12 +3176,18 @@
       }
       if (hit){
         if (ev.shiftKey){
-          selection.has(hit.id) ? selection.delete(hit.id) : selection.add(hit.id);
+          const wasIn = selection.has(hit.id);
+          if (hit.gid){
+            entities.forEach(e=>{ if (e.gid === hit.gid){ wasIn ? selection.delete(e.id) : selection.add(e.id); } });
+          } else {
+            wasIn ? selection.delete(hit.id) : selection.add(hit.id);
+          }
           renderProps(); draw();
           return;
         }
         if (!selection.has(hit.id)){
           selection = new Set([hit.id]);
+          expandGroupSelection();
           renderProps();
         }
         const editable = [...selection].every(id=>{
@@ -2825,6 +3236,7 @@
           if (eb.x1>=xa && eb.x2<=xb && eb.y1>=ya && eb.y2<=yb) selection.add(e.id);
         }
       });
+      expandGroupSelection();
       renderProps();
     }
     function windowDoneMsg(){
@@ -5054,6 +5466,7 @@
         row.addEventListener("click", ()=>{ currentLayerId = l.id; renderLayers(); });
         list.appendChild(row);
       });
+      if (typeof syncLayerCombo === "function") syncLayerCombo();
     }
     $("#addLayerBtn").addEventListener("click", ()=>{
       const palette = ["#e8e8e8","#f87171","#fb923c","#facc15","#4ade80","#22d3ee","#60a5fa","#f472b6","#a3a3a3"];
@@ -5073,7 +5486,7 @@
     $("#tabProps").addEventListener("click", ()=> showTab("props"));
     $("#panelBtn").addEventListener("click", ()=>{
       if (window.innerWidth <= 840){ $("#panel").classList.toggle("open"); }
-      else showTab($("#propsView").style.display==="none" ? "props" : "layers");
+      else $("#panel").classList.toggle("closed");
     });
 
     function fieldHTML(label, id, value, isLen){
@@ -5424,6 +5837,40 @@
       selection = new Set(newIds);
       renderProps(); updateCounts(); draw();
     }
+    /* ================= groups (GROUP / UNGROUP) ================= */
+    // A group stamps a shared gid on its members; picking any member picks
+    // the whole group, so grouped objects select, drag and erase as one.
+    function makeGroup(){
+      if (selection.size < 2){ setCmdLine("Group: select at least two objects first, then GROUP."); return; }
+      pushHistory();
+      const g = uid();
+      let n = 0;
+      selection.forEach(id=>{ const e = entities.find(x=>x.id===id); if (e){ e.gid = g; n++; } });
+      setCmdLine("Group created (" + n + " objects) — clicking any member selects the whole group. UNGROUP releases it.");
+      draw();
+    }
+    function unGroupSelection(){
+      if (!selection.size){ setCmdLine("Ungroup: select a grouped object first."); return; }
+      pushHistory();
+      const gids = new Set();
+      selection.forEach(id=>{ const e = entities.find(x=>x.id===id); if (e && e.gid) gids.add(e.gid); });
+      if (!gids.size){ setCmdLine("Ungroup: the selected objects are not in a group."); return; }
+      entities.forEach(e=>{ if (e.gid && gids.has(e.gid)) delete e.gid; });
+      setCmdLine("Group released — the objects select individually again.");
+      draw();
+    }
+    function expandGroupSelection(){
+      // Pull every member of any touched group into the selection.
+      let grew = true, guard = 0;
+      while (grew && guard++ < 8){
+        grew = false;
+        const gids = new Set();
+        selection.forEach(id=>{ const e = entities.find(x=>x.id===id); if (e && e.gid) gids.add(e.gid); });
+        if (!gids.size) break;
+        entities.forEach(e=>{ if (e.gid && gids.has(e.gid) && !selection.has(e.id)){ selection.add(e.id); grew = true; } });
+      }
+    }
+
     let clipboard = [];
     function copySelection(){
       clipboard = [...selection].map(id=>entities.find(e=>e.id===id)).filter(Boolean).map(deepClone);
@@ -5491,6 +5938,14 @@
       if (ev.key === "F1"){ ev.preventDefault(); $("#helpOverlay").classList.toggle("open"); return; }
       if (ev.key === "F2"){ ev.preventDefault(); if ($("#textWinOverlay").classList.contains("open")) $("#textWinOverlay").classList.remove("open"); else { if (lastPromptText) cmdLog(lastPromptText); renderTextWindow(); } return; }
       if (ev.key === "F3"){ ev.preventDefault(); settings.osnap = !settings.osnap; syncToggleBtns(); draw(); return; }
+      if (ev.key === "F5"){
+        ev.preventDefault();
+        if (!settings.iso){ settings.iso = true; settings.isoPlane = 0; }
+        else settings.isoPlane = ((settings.isoPlane || 0) + 1) % 3;
+        syncToggleBtns();
+        setCmdLine("Isometric drafting ON — isoplane " + ["Left", "Top", "Right"][settings.isoPlane] + " (F5 cycles the plane; the ISO status-bar pill turns it off).");
+        draw(); return;
+      }
       if (ev.key === "F7"){ ev.preventDefault(); toggleGrid(); return; }
       if (ev.key === "F8"){ ev.preventDefault(); toggleOrtho(); draw(); return; }
       if (ev.key === "F9"){ ev.preventDefault(); toggleSnap(); return; }
@@ -5526,6 +5981,9 @@
       if (mod && ev.key.toLowerCase() === "v"){ ev.preventDefault(); pasteClipboard(); return; }
       if (mod && ev.key.toLowerCase() === "x"){ copySelection(); deleteSelection(); return; }
       if (mod && ev.key.toLowerCase() === "a"){ ev.preventDefault(); selection = new Set(entities.filter(e=>{ const l=layerById(e.layer); return l&&l.visible; }).map(e=>e.id)); renderProps(); draw(); return; }
+      if (mod && ev.key.toLowerCase() === "n"){ ev.preventDefault(); $("#mNew").click(); return; }
+      if (mod && ev.key.toLowerCase() === "o"){ ev.preventDefault(); $("#mOpen").click(); return; }
+      if (mod && ev.key.toLowerCase() === "p"){ ev.preventDefault(); closeMenus(); $("#mPdf").click(); return; }
       // F-keys (AutoCAD toggles) work even mid-command
       if (ev.key === "F3"){ ev.preventDefault(); settings.osnap = !settings.osnap; syncToggleBtns(); draw(); return; }
       if (ev.key === "F9"){ ev.preventDefault(); toggleSnap(); return; }
@@ -5646,6 +6104,10 @@
       $("#polarPill").classList.toggle("on", settings.polar);
       $("#otrackPill").classList.toggle("on", settings.otrack);
       $("#dynPill").classList.toggle("on", settings.dynInput);
+      $("#isoPill").classList.toggle("on", !!settings.iso);
+      $("#isoPill").textContent = settings.iso ? "ISO " + ["L", "T", "R"][settings.isoPlane || 0] : "ISO";
+      $("#lwtPill").classList.toggle("on", settings.lwDisplay !== false);
+      $("#selCyclePill").classList.toggle("on", !!settings.selCycle);
       $("#polarPill").textContent = "POLAR " + settings.polarAngle + "°" + ((settings.polarCustom||[]).length ? "+" + settings.polarCustom.length : "");
     }
     $("#gridBtn").addEventListener("click", toggleGrid);
@@ -5912,6 +6374,8 @@
       };
       mkTab("Model", "model");
       layouts.forEach(L=> mkTab(L.name, L.id));
+      const mc = document.getElementById("modelChip");
+      if (mc) mc.textContent = layoutMode() ? "PAPER" : "MODEL";
       const add = document.createElement("button");
       add.className = "ltab add"; add.textContent = "+"; add.title = "Add layout";
       add.addEventListener("click", ()=>{
@@ -6564,6 +7028,7 @@
     }
     function openPanelTab(tab){
       const panel = $("#panel");
+      panel.classList.remove("closed");
       if (window.innerWidth <= 840) panel.classList.add("open");
       if (tab === "layers"){ $("#tabLayers").click(); } else { $("#tabProps").click(); }
     }
@@ -6720,6 +7185,8 @@
       if (tok === "help"){ $("#helpOverlay").classList.add("open"); return; }
       if (tok === "ortho"){ toggleOrtho(); return; }
       if (tok === "polar"){ togglePolar(); return; }
+      if (tok === "group" || tok === "g"){ makeGroup(); return; }
+      if (tok === "ungroup"){ unGroupSelection(); return; }
       const toolId = CMD_ALIASES[tok];
       if (toolId){
         if (layoutMode() && !["select","pan","viewport"].includes(toolId)) switchTab("model");
@@ -6894,6 +7361,7 @@
         settings: { unit: settings.unit, gridSize: settings.gridSize, bg: settings.bg,
                     polar: settings.polar, polarAngle: settings.polarAngle, polarCustom: settings.polarCustom || [],
                     otrack: settings.otrack, dynInput: settings.dynInput, lwDisplay: settings.lwDisplay,
+                    iso: settings.iso, isoPlane: settings.isoPlane,
                     selCycle: settings.selCycle, osnapModes: settings.osnapModes, cmdBarH: settings.cmdBarH },
         layers, currentLayerId, entities,
         dimStyles, currentDimStyleId, layouts
@@ -6960,6 +7428,8 @@
         if (typeof d.settings.otrack === "boolean") settings.otrack = d.settings.otrack;
         if (typeof d.settings.dynInput === "boolean") settings.dynInput = d.settings.dynInput;
         if (typeof d.settings.lwDisplay === "boolean") settings.lwDisplay = d.settings.lwDisplay;
+        if (typeof d.settings.iso === "boolean") settings.iso = d.settings.iso;
+        if (typeof d.settings.isoPlane === "number") settings.isoPlane = d.settings.isoPlane;
         if (typeof d.settings.selCycle === "boolean") settings.selCycle = d.settings.selCycle;
         if (d.settings.osnapModes) settings.osnapModes = Object.assign({ end:true, mid:true, cen:true, int:true, qua:true, nea:false }, d.settings.osnapModes);
         if (typeof d.settings.cmdBarH === "number"){ settings.cmdBarH = clamp(Math.round(d.settings.cmdBarH), 19, 800); applyCmdBarH(); }
@@ -7428,6 +7898,165 @@
       if (entities.length) askInPage("Replace the current drawing?", "The sample loads as a fresh drawing. Your current objects will be removed (Undo can bring them back).", build);
       else build();
     });
+
+    /* ================= AutoCAD 2026 chrome wiring ================= */
+    // Quick-access toolbar icons drive the application-menu actions.
+    $("#qatNew").addEventListener("click", ()=> $("#mNew").click());
+    $("#qatOpen").addEventListener("click", ()=> $("#mOpen").click());
+    $("#qatSave").addEventListener("click", ()=> $("#mSaveDxf").click());
+    $("#qatSaveAs").addEventListener("click", ()=> $("#mSave").click());
+
+    // File tab under the ribbon mirrors the drawing name (AutoCAD file tabs).
+    function syncFileTab(){
+      const n = ($("#docName").value || "").trim();
+      $("#ftabName").textContent = n || "Untitled drawing";
+    }
+    $("#docName").addEventListener("input", syncFileTab);
+    $("#ftabClose").addEventListener("click", ()=> $("#mNew").click());
+    $("#ftabAdd").addEventListener("click", ()=> $("#mNew").click());
+    syncFileTab();
+
+    // Ribbon Layers panel: layer combo makes a layer current (LA opens the palette).
+    function syncLayerCombo(){
+      const sel = $("#layerCombo"); if (!sel) return;
+      sel.innerHTML = layers.map(l=> `<option value="${l.id}">${escapeHtml(l.name)}</option>`).join("");
+      sel.value = currentLayerId;
+      const l = layerById(currentLayerId);
+      const sw = $("#layerSwatch");
+      if (sw && l) sw.style.background = l.color;
+    }
+    $("#layerCombo").addEventListener("change", ()=>{ currentLayerId = $("#layerCombo").value; renderLayers(); draw(); });
+    $("#layerPropsBtn").addEventListener("click", ()=> openPanelTab("layers"));
+
+    // Ribbon Properties panel: colour for new objects, mirrors the palette fields.
+    $("#propColor").addEventListener("input", ()=>{
+      $("#defColor").value = $("#propColor").value;
+      $("#defByLayer").checked = false; $("#propByLayer").checked = false;
+    });
+    $("#propByLayer").addEventListener("change", ()=>{ $("#defByLayer").checked = $("#propByLayer").checked; });
+    $("#propColor").value = $("#defColor").value;
+
+    // Groups, Utilities, Clipboard, Home View, Block panels.
+    $("#grpBtn").addEventListener("click", makeGroup);
+    $("#ungrpBtn").addEventListener("click", unGroupSelection);
+    $("#utilDist").addEventListener("click", ()=> setTool("dist"));
+    $("#utilArea").addEventListener("click", ()=> setTool("area"));
+    $("#utilId").addEventListener("click", ()=> setTool("id"));
+    $("#utilList").addEventListener("click", listSelection);
+    $("#clipCut").addEventListener("click", ()=>{ copySelection(); deleteSelection(); });
+    $("#clipCopy").addEventListener("click", ()=>{ copySelection(); setCmdLine("Copy: " + clipboard.length + " object(s) on the clipboard — Paste drops them offset by one grid square."); });
+    $("#clipPaste").addEventListener("click", pasteClipboard);
+    $("#homeFitBtn").addEventListener("click", fitView);
+    $("#blockInsertBtn").addEventListener("click", ()=> document.querySelector('[data-rtab="insert"]').click());
+    $("#blockSampleBtn").addEventListener("click", ()=> $("#insSample").click());
+
+    // Parametric tab.
+    $("#paraOrtho").addEventListener("click", toggleOrtho);
+    $("#paraPolar").addEventListener("click", togglePolar);
+    $("#paraDimLin").addEventListener("click", ()=> setTool("dimlinear"));
+    $("#paraDimAli").addEventListener("click", ()=> setTool("dimaligned"));
+    $("#paraDimAng").addEventListener("click", ()=> setTool("dimangular"));
+    $("#paraDimRad").addEventListener("click", ()=> setTool("dimradius"));
+    $("#paraDimDia").addEventListener("click", ()=> setTool("dimdiameter"));
+
+    // Manage tab.
+    $("#mgDsBtn").addEventListener("click", openDraftingSettings);
+    $("#mgDimStyleBtn").addEventListener("click", ()=> $("#dimStyleBtn").click());
+    $("#mgLayersBtn").addEventListener("click", ()=> openPanelTab("layers"));
+    $("#mgUnitsBtn").addEventListener("click", ()=> document.querySelector('[data-rtab="view"]').click());
+    $("#mgPropsBtn").addEventListener("click", ()=> openPanelTab("props"));
+    $("#mgPanelBtn").addEventListener("click", ()=> $("#panelBtn").click());
+
+    // Add-ins / Collaborate / Featured Apps / Express Tools tabs.
+    $("#addSampleBtn").addEventListener("click", ()=> $("#insSample").click());
+    $("#addTplBtn").addEventListener("click", ()=> $("#insTpl").click());
+    $("#addSaveTplBtn").addEventListener("click", ()=> $("#insSaveTpl").click());
+    $("#colSaveBtn").addEventListener("click", ()=> $("#mSaveDxf").click());
+    $("#colSaveJsonBtn").addEventListener("click", ()=> $("#mSave").click());
+    $("#colOpenBtn").addEventListener("click", ()=> $("#mOpen").click());
+    $("#featHelpBtn").addEventListener("click", ()=> $("#helpBtn").click());
+    $("#featThemeBtn").addEventListener("click", ()=> $("#themeBtn").click());
+    $("#expDist").addEventListener("click", ()=> setTool("dist"));
+    $("#expArea").addEventListener("click", ()=> setTool("area"));
+    $("#expId").addEventListener("click", ()=> setTool("id"));
+    $("#expList").addEventListener("click", listSelection);
+    $("#expOops").addEventListener("click", oopsRestore);
+    $("#expRegen").addEventListener("click", ()=>{ draw(); setCmdLine("Regenerated."); });
+
+    // Panel dialog launchers (the ↘ at each panel's caption).
+    document.querySelectorAll(".launch").forEach(el=>{
+      el.addEventListener("click", ev=>{
+        ev.stopPropagation();
+        const k = el.dataset.launch;
+        if (k === "ds") openDraftingSettings();
+        else if (k === "dimstyle") $("#dimStyleBtn").click();
+        else if (k === "layers") openPanelTab("layers");
+        else if (k === "props") openPanelTab("props");
+        else if (k === "inserttab") document.querySelector('[data-rtab="insert"]').click();
+        else if (k === "viewtab") document.querySelector('[data-rtab="view"]').click();
+      });
+    });
+
+    // ViewCube (Home = Zoom Extents) and the right-edge Navigation Bar.
+    $("#vcCube").addEventListener("click", fitView);
+    $("#vcHome").addEventListener("click", fitView);
+    $("#navPan").addEventListener("click", ()=>{
+      setTool(tool === "pan" ? "select" : "pan");
+      $("#navPan").classList.toggle("active", tool === "pan");
+    });
+    $("#navFit").addEventListener("click", fitView);
+
+    // Status bar: isometric, lineweight and selection-cycling pills,
+    // the Model/Paper chip, and the customization (☰) toggle.
+    $("#isoPill").addEventListener("click", ()=>{
+      settings.iso = !settings.iso;
+      if (settings.iso) setCmdLine("Isometric drafting ON — isoplane " + ["Left", "Top", "Right"][settings.isoPlane || 0] + ". F5 cycles the plane; typed points and drags follow the iso axes.");
+      else setCmdLine("Isometric drafting OFF.");
+      syncToggleBtns(); draw();
+    });
+    $("#isoPill").addEventListener("contextmenu", ev=>{
+      ev.preventDefault();
+      settings.iso = true;
+      settings.isoPlane = ((settings.isoPlane || 0) + 1) % 3;
+      setCmdLine("Isoplane: " + ["Left", "Top", "Right"][settings.isoPlane] + ".");
+      syncToggleBtns(); draw();
+    });
+    $("#lwtPill").addEventListener("click", ()=>{
+      settings.lwDisplay = !settings.lwDisplay;
+      syncToggleBtns(); draw();
+      setCmdLine("Lineweight display " + (settings.lwDisplay ? "ON — objects draw at their true lineweight." : "OFF — uniform hairlines."));
+    });
+    $("#selCyclePill").addEventListener("click", ()=>{
+      settings.selCycle = !settings.selCycle; cycleState = null;
+      syncToggleBtns();
+      setCmdLine("Selection cycling " + (settings.selCycle ? "ON — repeated clicks on overlapping objects cycle through them." : "OFF."));
+    });
+    $("#modelChip").addEventListener("click", ()=>{
+      if (layoutMode()) switchTab("model");
+      else setCmdLine("Model space — full-size drawing happens here. The Layout tabs under the canvas hold the plotted sheets.");
+    });
+    $("#sbMenuBtn").addEventListener("click", ()=>{
+      document.querySelector(".statusbar").classList.toggle("sb-compact");
+    });
+
+    // Ribbon minimize cycle: full → panel titles → tabs only (AutoCAD's ⌃ button).
+    let ribMinState = 0;
+    $("#ribMinBtn").addEventListener("click", ()=>{
+      ribMinState = (ribMinState + 1) % 3;
+      const r = $("#ribbon");
+      if (ribMinState === 0) r.removeAttribute("data-min");
+      else r.setAttribute("data-min", ribMinState === 1 ? "panels" : "tabs");
+      $("#ribMinBtn").textContent = ribMinState === 0 ? "⌃ Minimize" : "⌄ Ribbon";
+      resize();
+    });
+    document.querySelectorAll(".rtab").forEach(t=> t.addEventListener("click", ()=>{
+      if (ribMinState !== 0){
+        ribMinState = 0;
+        $("#ribbon").removeAttribute("data-min");
+        $("#ribMinBtn").textContent = "⌃ Minimize";
+        resize();
+      }
+    }));
 
     /* ================= init ================= */
     buildRibbon();

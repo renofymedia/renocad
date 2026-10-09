@@ -333,7 +333,6 @@
         .rtool{ width:48px; }
         .rtab{ padding:5px 12px; }
         .cmdline .cmd-prompt{ max-width:52vw; }
-        .rbody.active{ flex-wrap:wrap; }
         .doc-name{ max-width:110px; min-width:80px; }
         .statusbar .hint{ display:none; }
         .statusbar .coords{ width:30ch; max-width:56vw; }
@@ -468,8 +467,7 @@
       /* ---------- ribbon density: panels size to content and wrap as
          whole panels (AutoCAD collapses panels rather than crushing
          them); tighter tools so the full Home tab fits desktop widths */
-      .rpanel{ flex:none; max-width:342px; }
-      .rbody.active{ flex-wrap:wrap; row-gap:4px; }
+      .rpanel{ flex:none; }
       .rtool{ width:48px; }
       .rtool svg{ width:20px; height:20px; }
       .rtool .rl{ font-size:9.5px; }
@@ -483,7 +481,6 @@
         .rpanel{ padding:0 6px 1px; max-width:100%; }
         /* the ribbon scrolls vertically within a capped band so the
            command line and status bar always stay on screen */
-        .rbody.active{ max-height:29vh; overflow-y:auto; }
         .cmd-history{ max-height:42px; }
         .statusbar{ gap:6px; padding:4px 8px; font-size:11.5px; }
         .statusbar .pill{ padding:1px 6px; font-size:10.5px; }
@@ -492,6 +489,51 @@
         .layout-tabs{ padding:3px 7px 0; }
         .ltab{ padding:4px 10px; font-size:12px; }
       }
+
+      /* ---------- ribbon: one compact fixed-height row (AutoCAD 2026) ----------
+         The ribbon NEVER wraps vertically. Each body is a fixed-height strip;
+         tools flow in two short rows inside a panel (column wrap), and when
+         the window is too narrow, whole panels collapse into flyout buttons
+         (see relayoutRibbon in the script) instead of stacking. */
+      .rbody{ padding:5px 8px 3px; }
+      .rbody.active{ flex-wrap:nowrap; height:112px; }
+      .rbody.active.scrollx{ overflow-x:auto; overflow-y:hidden; }
+      .ribbon[data-min="panels"] .rbody.active{ height:auto; }
+      .rtabs{ flex-wrap:nowrap; overflow-x:auto; overflow-y:hidden; scrollbar-width:thin; }
+      .rtab{ flex:none; }
+      .rpanel{ flex:none; max-width:none; height:100%; padding:0 8px 1px; }
+      .rpanel.rp-hidden{ display:none; }
+      .rpanel-tools{
+        flex:none; height:86px; flex-direction:column; flex-wrap:wrap;
+        align-content:flex-start; align-items:flex-start; overflow:hidden;
+      }
+      .rpanel-cap{ flex:none; position:relative; padding-top:2px; }
+      /* the Export dropdown lives inside a panel: stop clipping while it is open */
+      .rpanel-tools:has(.menu.open){ overflow:visible; }
+      .rtool{ width:50px; height:42px; padding:3px 1px 2px; gap:1px; }
+      .rtool svg{ width:17px; height:17px; }
+      .rtool .rl{ font-size:8.5px; line-height:1.12; max-height:19px; overflow:hidden; }
+      /* collapsed-panel flyout button, left in the row where the panel was */
+      .rpanel-flybtn{
+        flex:none; width:56px; height:100%; margin:0; padding:4px 3px 3px;
+        display:flex; flex-direction:column; align-items:center; justify-content:flex-end; gap:2px;
+        background:none; border:none; border-right:1px solid var(--line); border-radius:0;
+        cursor:pointer; color:var(--ink); font-size:9px; line-height:1.15; text-align:center;
+      }
+      .rpanel-flybtn .rfb-name{ max-height:22px; overflow:hidden; }
+      .rpanel-flybtn .rfb-chev{ color:var(--ink-dim); font-size:10px; }
+      .rpanel-flybtn:hover{ background:var(--btn-hover); }
+      .rpanel-flybtn.open{ background:var(--btn-hover); color:var(--accent); }
+      /* the flyout itself: the collapsed panel, floated under its button */
+      .rflyout{
+        position:fixed; z-index:90; background:var(--panel);
+        border:1px solid var(--line); border-radius:8px;
+        box-shadow:0 16px 40px rgba(0,0,0,.4); padding:6px 4px 4px;
+        animation:popIn .14s ease;
+      }
+      .rflyout[hidden]{ display:none; }
+      .rpanel.in-flyout{ border-right:none; height:auto; max-width:92vw; }
+      .rpanel.in-flyout .rpanel-tools{ height:130px; }
     </style>
   </head>
   <body>
@@ -872,6 +914,8 @@
                   <option value="m">Metres</option>
                 </select>
               </label>
+            </div>
+            <div class="rstack">
               <label>Grid
                 <select class="btn" id="gridSel">
                   <option value="1.5875">1/16″</option>
@@ -885,6 +929,8 @@
                   <option value="100">100 mm</option>
                 </select>
               </label>
+            </div>
+            <div class="rstack">
               <label>Canvas
                 <select class="btn" id="bgSel">
                   <option value="dark">Dark</option>
@@ -2969,6 +3015,102 @@
         });
       });
     }
+
+    /* ---- ribbon panel collapse ------------------------------------------------
+       The ribbon body is one fixed-height row. When the active tab's panels are
+       wider than the window, whole panels (from the right) collapse into flyout
+       buttons — AutoCAD's behavior — instead of wrapping onto extra rows. */
+    const ribbonFlyout = document.createElement("div");
+    ribbonFlyout.className = "rflyout";
+    ribbonFlyout.hidden = true;
+    document.body.appendChild(ribbonFlyout);
+    let flyoutState = null, relayoutBusy = false;
+
+    function panelCaptionName(panel){
+      const cap = panel.querySelector(".rpanel-cap");
+      let name = "";
+      if (cap) for (const n of cap.childNodes) if (n.nodeType === 3) name += n.textContent;
+      name = name.trim();
+      if (!name){
+        const b = panel.querySelector(".rbtn-sm, .rtool");
+        name = b ? (b.textContent || "").trim() : "";
+      }
+      return name || "Panel";
+    }
+    function closePanelFlyout(){
+      ribbonFlyout.hidden = true;
+      if (!flyoutState) return;
+      const st = flyoutState; flyoutState = null;
+      if (st.ph.parentNode) st.ph.parentNode.replaceChild(st.panel, st.ph);
+      st.panel.classList.remove("in-flyout");
+      st.panel.classList.add("rp-hidden");
+      if (st.btn) st.btn.classList.remove("open");
+    }
+    function openPanelFlyout(panel, btn){
+      closePanelFlyout();
+      const ph = document.createComment("ribbon-panel-home");
+      panel.parentNode.insertBefore(ph, panel);
+      ribbonFlyout.appendChild(panel);
+      panel.classList.remove("rp-hidden");
+      panel.classList.add("in-flyout");
+      ribbonFlyout.hidden = false;
+      const r = btn.getBoundingClientRect();
+      ribbonFlyout.style.left = Math.max(4, Math.min(r.left, window.innerWidth - ribbonFlyout.offsetWidth - 8)) + "px";
+      ribbonFlyout.style.top = (r.bottom + 4) + "px";
+      btn.classList.add("open");
+      flyoutState = { panel, btn, ph };
+    }
+    function relayoutRibbon(){
+      if (relayoutBusy) return;
+      relayoutBusy = true;
+      try {
+        closePanelFlyout();
+        const bodyEl = document.querySelector(".rbody.active");
+        if (!bodyEl) return;
+        bodyEl.querySelectorAll(".rpanel-flybtn").forEach(b=> b.remove());
+        bodyEl.querySelectorAll(".rpanel.rp-hidden").forEach(p=> p.classList.remove("rp-hidden"));
+        if (!bodyEl.clientWidth) return; /* ribbon minimized to tabs only */
+        const panels = [...bodyEl.querySelectorAll(":scope > .rpanel")];
+        let guard = panels.length + 1;
+        while (guard-- > 0 && bodyEl.scrollWidth > bodyEl.clientWidth + 1){
+          const visible = panels.filter(p=> !p.classList.contains("rp-hidden"));
+          if (visible.length <= 1) break; /* keep one panel expanded; the rest fly out */
+          const panel = visible[visible.length - 1];
+          const name = panelCaptionName(panel);
+          const btn = document.createElement("button");
+          btn.className = "rpanel-flybtn";
+          btn.title = "Show the " + name + " panel";
+          const nm = document.createElement("span");
+          nm.className = "rfb-name"; nm.textContent = name;
+          const ch = document.createElement("span");
+          ch.className = "rfb-chev"; ch.textContent = "▾";
+          btn.appendChild(nm); btn.appendChild(ch);
+          btn.addEventListener("click", ev=>{
+            ev.stopPropagation();
+            if (flyoutState && flyoutState.btn === btn) closePanelFlyout();
+            else openPanelFlyout(panel, btn);
+          });
+          panel.before(btn);
+          panel.classList.add("rp-hidden");
+        }
+        /* even the flyout buttons alone can overflow on a very narrow screen:
+           only then does the single row scroll sideways (it never wraps).
+           Toggled only on change so the class MutationObserver settles. */
+        const needScroll = bodyEl.scrollWidth > bodyEl.clientWidth + 1;
+        if (needScroll !== bodyEl.classList.contains("scrollx")) bodyEl.classList.toggle("scrollx", needScroll);
+      } finally { relayoutBusy = false; }
+    }
+    window.addEventListener("resize", relayoutRibbon);
+    window.addEventListener("load", relayoutRibbon);
+    document.addEventListener("pointerdown", ev=>{
+      if (flyoutState && !ribbonFlyout.contains(ev.target) && !flyoutState.btn.contains(ev.target)) closePanelFlyout();
+    });
+    document.addEventListener("keydown", ev=>{ if (ev.key === "Escape") closePanelFlyout(); });
+    ribbonFlyout.addEventListener("click", ev=>{
+      if (ev.target.closest(".rtool, .rbtn-sm")) setTimeout(closePanelFlyout, 30);
+    });
+    new MutationObserver(relayoutRibbon).observe(document.getElementById("ribbon"), { attributes:true, attributeFilter:["data-min"] });
+    document.querySelectorAll(".rbody").forEach(b=> new MutationObserver(relayoutRibbon).observe(b, { attributes:true, attributeFilter:["class"] }));
 
     /* ================= pointer interaction ================= */
     let dragCtx = null;   // active drag operation
@@ -8543,6 +8685,7 @@
 
     /* ================= init ================= */
     buildRibbon();
+    relayoutRibbon();
     $("#docName").addEventListener("change", ()=>{ /* name only drives file names */ });
     $("#unitSel").value = settings.unit;
     $("#gridSel").value = String(settings.gridSize);

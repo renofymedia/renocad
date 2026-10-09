@@ -188,7 +188,14 @@
         display:flex; align-items:center; gap:14px; padding:5px 12px; flex-wrap:wrap;
         background:var(--panel); border-top:1px solid var(--line); font-size:12.5px; z-index:30;
       }
-      .statusbar .coords{ min-width:170px; }
+      /* fixed-width readout: the box never resizes as values change, so the
+         SNAP/GRID/ORTHO/POLAR pills never shift while the cursor moves */
+      .statusbar .coords{
+        flex:none; width:46ch; max-width:46ch; white-space:nowrap; overflow:hidden;
+        text-overflow:ellipsis; font-variant-numeric:tabular-nums;
+      }
+      .statusbar #zoomReadout{ flex:none; width:7ch; text-align:right; font-variant-numeric:tabular-nums; }
+      .statusbar #objCount{ flex:none; min-width:12ch; text-align:right; font-variant-numeric:tabular-nums; }
       .statusbar .hint{ flex:1; color:var(--ink-dim); text-align:center; min-width:180px; }
       .statusbar .right{ display:flex; gap:12px; align-items:center; color:var(--ink-dim); }
       .pill{ padding:2px 9px; border-radius:12px; border:1px solid var(--line); font-size:11.5px; background:none; color:inherit; font-family:inherit; cursor:pointer; }
@@ -329,7 +336,8 @@
         .rbody.active{ flex-wrap:wrap; }
         .doc-name{ max-width:110px; min-width:80px; }
         .statusbar .hint{ display:none; }
-        .statusbar .coords{ min-width:0; }
+        .statusbar .coords{ width:30ch; max-width:56vw; }
+        .statusbar #objCount{ min-width:0; }
         .statusbar{ gap:8px; }
         .statusbar .right{ flex-wrap:wrap; gap:6px; justify-content:flex-end; }
       }
@@ -479,7 +487,8 @@
         .cmd-history{ max-height:42px; }
         .statusbar{ gap:6px; padding:4px 8px; font-size:11.5px; }
         .statusbar .pill{ padding:1px 6px; font-size:10.5px; }
-        .statusbar .coords{ min-width:0; }
+        .statusbar .coords{ width:30ch; max-width:56vw; }
+        .statusbar #objCount{ min-width:0; }
         .layout-tabs{ padding:3px 7px 0; }
         .ltab{ padding:4px 10px; font-size:12px; }
       }
@@ -1061,13 +1070,14 @@
           <tr><td class="mono">L / PL / SPL / REC / C / A / EL / POL / DO / XL</td><td>Line (keeps going segment after segment; U undoes one, C closes) · Polyline · Spline (smooth curve through the points; C closes) · Rectangle (right-click for Chamfer/Fillet corners) · Circle · Arc (3-point, right-click for Center) · Ellipse · Polygon · Donut (inside/outside diameters, then a ring per click) · Construction line (infinite guide through two points)</td></tr>
           <tr><td class="mono">M · CO · RO · SC · MI · ST · O · TR · EX · F · CHA · AR · X · J · BR · DIV · ME · LEN · AL · H · MA · G</td><td>Move · Copy · Rotate · Scale · Mirror (asks Erase source? [Yes/No] &lt;N&gt;) · Stretch (crossing window first: geometry inside the window moves, the rest stays) · Offset (copies toward the side you click) · Trim (Quick mode: everything cuts, Shift+click extends, type T for cutting edges) · Extend (Shift+click trims) · Fillet · Chamfer · Array · Explode · Join · Break · Divide (equal segments) · Measure (points every typed length) · Lengthen (DElta/Total, then click near an end) · Align (2 source→destination point pairs, optional scale) · Hatch · Match properties · Group (G binds the selection so it picks and moves as one; UNGROUP releases it)</td></tr>
           <tr><td class="mono">E · R · U · OOPS · LI · DI · AA · ID</td><td>Erase the selection · Redraw · Undo (Ctrl+Z too) · OOPS restores the last erased objects · LIST reports the selection in the command window · DIstance / ARea / ID measure and report</td></tr>
+          <tr><td class="mono">DIM · DLI · DAL · DRA · DDI · DAN · DAR · DOR · DCE · DBA · DCO · DED</td><td>Smart dimension (circle→diameter, arc→radius, line→linear) · Linear · Aligned · Radius · Diameter · Angular · Arc length · Ordinate (datum = origin) · Center mark · Baseline (each line steps out by the style's baseline spacing) · Continue (chains on the same line) · Dimedit. Dimensions picked from geometry are <strong>associative</strong>: move or stretch the source and the dimension follows; erasing the source leaves it fixed in place</td></tr>
           <tr><td class="mono">D · DS · LA · PR · UN</td><td>Dimension styles · Drafting settings (object-snap modes, tracking, dynamic input, lineweight display) · Layers panel · Properties panel · Units (View tab)</td></tr>
           <tr><td class="mono">F7 Grid · F9 Snap · F8 Ortho · F10 Polar · F3 OSnap · F11 OTrack · F12 Dyn · F2 History</td><td>Ortho locks horizontal/vertical (Shift temporarily inverts it); Polar snaps to the chosen increment plus your custom angles (View tab → Polar settings) with a dotted tracking path and tooltip; object snap finds endpoints, midpoints, centres, quadrants, intersections (nearest optional in DS); OTrack tracks horizontally/vertically from hovered snap points; the status-bar pills at bottom-right toggle the same aids</td></tr>
           <tr><td class="mono">Typed entry</td><td>Line: length + angle · Rect: W,H · Circle: radius or D120 for diameter · Move/Copy: type a distance to travel along the polar-tracked direction (direct distance entry), @ΔX,ΔY for a relative vector, or dist&lt;angle · Offset: distance, two points, or M for Multiple</td></tr>
           <tr><td class="mono">Window / Crossing</td><td>No holding the button: click one corner, move, click the opposite corner (press-and-drag still works too). Left→right (blue) selects fully-enclosed objects only; right→left (green dashed) selects anything touched. Works idle and at any "Select objects:" step (MOVE, COPY…); Esc cancels a half-built window</td></tr>
           <tr><td class="mono">Enter / Space</td><td>Space works exactly like Enter (AutoCAD-style): it runs a typed command, confirms typed values and selections, finishes polylines, and repeats the last command when idle. It only inserts a real space while typing actual text</td></tr>
           <tr><td class="mono">Command window</td><td>Drag the grip strip above the command line to show more or fewer history lines (double-click resets); the size is saved with the drawing. Zoom buttons and Fit glide smoothly; the object under the cursor highlights before you pick it</td></tr>
-          <tr><td class="mono">Dim styles</td><td>Annotate tab → Dimension styles…: arrowheads, text height/placement, ft-in/fractional/decimal precision, extension offsets. Changing a style restyles its dimensions</td></tr>
+          <tr><td class="mono">Dim styles</td><td>Annotate tab → Dimension styles…: arrowheads (closed / tick / dot / open), text height & placement, ft-in / fractional / decimal / metric precision, extension-line offset & overshoot, global fit scale, baseline spacing, symmetric / deviation / limits tolerances, zero suppression. Per-dimension overrides live in Properties (label, text height, style, break association). Changing a style restyles its dimensions</td></tr>
           <tr><td class="mono">Layouts</td><td>Tabs under the canvas: Model + sheets. Pick a paper size, draw viewports, set print scales like 1/4″=1′-0″, lock them, fill the title block, then Export → Layout sheet (PDF/PNG). Viewport borders never print</td></tr>
           <tr><td class="mono">Templates</td><td>File → New from template: Arch D / Arch C / Letter / A1 / A3 presets, plus Save setup as template for your own</td></tr>
           <tr><td class="mono">Ctrl+S · SAVE / QSAVE</td><td>Save the drawing as an AutoCAD-compatible .dxf (opens natively in AutoCAD; File → Save as .json keeps the editable app copy)</td></tr>
@@ -1075,7 +1085,7 @@
         </table>
         <p><strong>Save your work:</strong> File → Save (or Ctrl+S, or the SAVE command) writes an AutoCAD-compatible .dxf in one click — AutoCAD opens .dxf natively with geometry, layers and dimensions intact (true .dwg is Autodesk's proprietary format, which no browser app can author). File → Save as .json keeps a fully editable copy for this app (dim styles, layouts and templates too); reopen it with File → Open. Drawings live in this page only — save before closing the tab.</p>
         <h3 style="margin:14px 0 6px;font-size:13px">Compatibility &amp; scope</h3>
-        <p style="font-size:12.5px">Reference version: AutoCAD 2026, 2D drafting scope. Explicitly deferred rather than approximated: the parametric constraint solver (the Parametric tab carries the dimensional commands only), the BLOCK / INSERT / ATTDEF block engine (GROUP/UNGROUP covers object sets), associative dimensions and hatches, and external references (XREF). A control is only shown when the command behind it works.</p>
+        <p style="font-size:12.5px">Reference version: AutoCAD 2026, 2D drafting scope. Explicitly deferred rather than approximated: the parametric constraint solver (the Parametric tab carries the dimensional commands only), the BLOCK / INSERT / ATTDEF block engine (GROUP/UNGROUP covers object sets), associative hatches, and external references (XREF). Dimensions are associative when picked from geometry. A control is only shown when the command behind it works.</p>
         <div class="dlg-actions"><button class="btn" id="helpClose">Close</button></div>
       </div>
     </div>
@@ -1225,8 +1235,8 @@
       if (!isFinite(mm)) return "—";
       const f = style ? style.unitsFormat : "arch";
       const inches = mm/25.4;
-      if (f === "mm") return (Math.round(mm*100)/100).toString() + " mm";
-      if (f === "dec") return inches.toFixed(style && style.precision!=null ? style.precision : 2) + "″";
+      if (f === "mm"){ const v = (Math.round(mm*100)/100); return (style && style.zeroSupp ? stripZeros(v.toFixed(style.precision!=null?style.precision:2)) : v.toString()) + " mm"; }
+      if (f === "dec"){ let v = inches.toFixed(style && style.precision!=null ? style.precision : 2); if (style && style.zeroSupp) v = stripZeros(v); return v + "″"; }
       if (f === "frac") return fracStr(inches, style && style.precision ? style.precision : 16);
       // architectural: feet + fractional inches
       const denom = style && style.precision ? style.precision : 16;
@@ -1236,6 +1246,29 @@
       const rem = absIn - ft*12;
       if (ft === 0) return sign + fracStr(rem, denom);
       return sign + ft + "′-" + fracStr(rem, denom);
+    }
+    function stripZeros(s){
+      if (s.indexOf(".") === -1) return s;
+      return s.replace(/0+$/, "").replace(/\.$/, ".0");
+    }
+    /* dimension label = measured value + style tolerances (deviation /
+       limits / symmetric), unless the dim carries a text override.
+       Returns { main, stack:[hi,lo] } — stack is drawn small beside main. */
+    function dimLabelParts(e, st, valMM){
+      if (e.textOverride && e.textOverride.trim()) return { main: e.textOverride, stack: [] };
+      const base = formatDimLen(valMM, st);
+      const mode = st.tolMode || "none";
+      if (mode === "none" || e.mode === "angular") return { main: base, stack: [] };
+      const tp = st.tolPlus || 0, tm = st.tolMinus || 0;
+      if (mode === "sym") return { main: base + " ±" + formatDimLen(tp, st), stack: [] };
+      if (mode === "limits") return { main: "", stack: [ formatDimLen(valMM + tp, st), formatDimLen(valMM - tm, st) ] };
+      return { main: base, stack: [ "+" + formatDimLen(tp, st), "−" + formatDimLen(tm, st) ] };
+    }
+    /* effective dimension text height: per-dim override wins, then the
+       style's text height (scaled by its global fit scale). */
+    function dimTHof(e, st, scale){
+      if (e && e.thO > 0) return e.thO;
+      return (st.textH && st.textH > 0) ? st.textH * (st.globalScale || 1) : Math.max(2.6, 11/(scale || view.scale));
     }
     function formatLen(mm, unit){
       unit = unit || settings.unit;
@@ -1330,16 +1363,33 @@
     function defaultDimStyles(){
       return [
         { id:"dsStandard", name:"Standard", arrow:"closed", arrowSize:3, textH:3.2, textPlace:"above",
-          unitsFormat:"dec", precision:2, extOffset:1.6, extOver:2.2 },
+          unitsFormat:"dec", precision:2, extOffset:1.6, extOver:2.2,
+          globalScale:1, baseline:9.5, textOffset:1.27, tolMode:"none", tolPlus:0, tolMinus:0, zeroSupp:false },
         { id:"dsArch", name:"Architectural", arrow:"tick", arrowSize:3.4, textH:3.4, textPlace:"above",
-          unitsFormat:"arch", precision:16, extOffset:2.5, extOver:3 },
+          unitsFormat:"arch", precision:16, extOffset:2.5, extOver:3,
+          globalScale:1, baseline:9.5, textOffset:1.27, tolMode:"none", tolPlus:0, tolMinus:0, zeroSupp:false },
         { id:"dsMetric", name:"Metric", arrow:"closed", arrowSize:3, textH:3.2, textPlace:"above",
-          unitsFormat:"mm", precision:2, extOffset:1.6, extOver:2.2 }
+          unitsFormat:"mm", precision:2, extOffset:1.6, extOver:2.2,
+          globalScale:1, baseline:9.5, textOffset:1.27, tolMode:"none", tolPlus:0, tolMinus:0, zeroSupp:false }
       ];
     }
     let dimStyles = defaultDimStyles();
     let currentDimStyleId = "dsArch";
-    function dimStyleById(id){ return dimStyles.find(s=>s.id===id) || dimStyles[0] || defaultDimStyles()[0]; }
+    function dimStyleById(id){
+      const s = dimStyles.find(s=>s.id===id) || dimStyles[0] || defaultDimStyles()[0];
+      // backfill the Batch-2 style fields on styles saved by earlier versions
+      if (s && !s._b3){
+        if (s.globalScale == null) s.globalScale = 1;
+        if (s.baseline == null) s.baseline = 9.5;
+        if (s.textOffset == null) s.textOffset = 1.27;
+        if (!s.tolMode) s.tolMode = "none";
+        if (s.tolPlus == null) s.tolPlus = 0;
+        if (s.tolMinus == null) s.tolMinus = 0;
+        if (s.zeroSupp == null) s.zeroSupp = false;
+        s._b3 = 1;
+      }
+      return s;
+    }
     function dimStyleOf(e){ return dimStyleById(e && e.style ? e.style : currentDimStyleId); }
     function currentDimStyle(){ return dimStyleById(currentDimStyleId); }
 
@@ -1351,7 +1401,7 @@
     function makeLayout(name, paperName, orient){
       const wh = PAPER_SIZES[paperName] || PAPER_SIZES["Arch D"];
       const landscape = orient !== "portrait";
-      return {
+      const L = {
         id: uid(), name: name || "Layout1", paper: paperName, orient: landscape ? "landscape" : "portrait",
         w: landscape ? Math.max(wh[0],wh[1]) : Math.min(wh[0],wh[1]),
         h: landscape ? Math.min(wh[0],wh[1]) : Math.max(wh[0],wh[1]),
@@ -1359,6 +1409,17 @@
         title: { project:"", company:"", drawn:"", date:"", scale:"", sheet:"" },
         viewports: []
       };
+      // Like AutoCAD, every new layout is born with one default viewport on
+      // model space, fitted to whatever is drawn (or centred at the origin
+      // at 1/4″=1′-0″ while the model is still empty).
+      L.viewports.push(defaultViewport(L));
+      return L;
+    }
+    function defaultViewport(L){
+      const m = L.margin;
+      const vp = makeViewport(m, m, Math.max(20, L.w - 2*m), Math.max(20, L.h - 2*m));
+      fitViewportToModel(vp);
+      return vp;
     }
     function makeViewport(x, y, w, h){
       return { id: uid(), x, y, w, h, cx:0, cy:0, denom:48, locked:false };
@@ -1475,6 +1536,14 @@
           return { x1:e.x, y1:e.y, x2:e.x+w, y2:e.y+h };
         }
         case "dim": {
+          refreshAssocDim(e);
+          if (e.mode === "arclength"){
+            const rd = (e.r || 0) + Math.max(e.off || 0, 1);
+            const xs = [e.cx], ys = [e.cy];
+            for (let a = e.a0 || 0; a <= (e.a1 || 0) + 1e-9; a += Math.PI/12){ xs.push(e.cx + rd*Math.cos(a)); ys.push(e.cy + rd*Math.sin(a)); }
+            xs.push(e.cx + rd*Math.cos(e.a1||0)); ys.push(e.cy + rd*Math.sin(e.a1||0));
+            return { x1:Math.min(...xs), y1:Math.min(...ys), x2:Math.max(...xs), y2:Math.max(...ys) };
+          }
           const d = dimGeom(e);
           const xs = [e.x1,e.x2,d.p1[0],d.p2[0]], ys=[e.y1,e.y2,d.p1[1],d.p2[1]];
           return { x1:Math.min(...xs), y1:Math.min(...ys), x2:Math.max(...xs), y2:Math.max(...ys) };
@@ -1498,7 +1567,7 @@
         case "polyline": case "spline": e.pts = e.pts.map(p=>[p[0]+dx,p[1]+dy]); break;
         case "rect": case "image": case "text": case "point": case "xline": e.x+=dx; e.y+=dy; break;
         case "circle": case "arc": case "ellipse": case "donut": e.cx+=dx; e.cy+=dy; break;
-        case "dim": e.x1+=dx; e.y1+=dy; e.x2+=dx; e.y2+=dy; if (e.x3 != null){ e.x3+=dx; e.y3+=dy; } if (e.mode === "linear-h" && e.loc != null) e.loc+=dy; if (e.mode === "linear-v" && e.loc != null) e.loc+=dx; break;
+        case "dim": if (e.mode === "arclength"){ e.cx+=dx; e.cy+=dy; } else { e.x1+=dx; e.y1+=dy; e.x2+=dx; e.y2+=dy; if (e.x3 != null){ e.x3+=dx; e.y3+=dy; } if (e.mode === "linear-h" && e.loc != null) e.loc+=dy; if (e.mode === "linear-v" && e.loc != null) e.loc+=dx; } break;
       }
     }
     function rotPt(x,y,cx,cy,a){
@@ -1536,6 +1605,7 @@
         case "point": [e.x,e.y]=rotPt(e.x,e.y,cx,cy,a); break;
         case "text": [e.x,e.y]=rotPt(e.x,e.y,cx,cy,a); e.rot=(e.rot||0)+a; break;
         case "dim": {
+          if (e.mode === "arclength"){ [e.cx,e.cy]=rotPt(e.cx,e.cy,cx,cy,a); e.a0+=a; e.a1+=a; break; }
           const wasLinear = (e.mode === "linear-h" || e.mode === "linear-v");
           const oldLinePt = wasLinear ? dimGeom(e).p1 : null;
           [e.x1,e.y1]=rotPt(e.x1,e.y1,cx,cy,a); [e.x2,e.y2]=rotPt(e.x2,e.y2,cx,cy,a);
@@ -1567,7 +1637,7 @@
         case "ellipse": { const [nx,ny]=S(e.cx,e.cy); e.cx=nx; e.cy=ny; e.rx*=Math.abs(sx); e.ry*=Math.abs(sy); break; }
         case "point": [e.x,e.y]=S(e.x,e.y); break;
         case "text": { const [nx,ny]=S(e.x,e.y); e.x=nx; e.y=ny; e.h*=Math.abs(sy); break; }
-        case "dim": [e.x1,e.y1]=S(e.x1,e.y1); [e.x2,e.y2]=S(e.x2,e.y2); if (e.x3 != null) [e.x3,e.y3]=S(e.x3,e.y3); e.off*=sy; if ((e.mode==="radius" || e.mode==="diameter") && e.r != null) e.r*=Math.abs(sx); if (e.mode==="linear-h" && e.loc != null) e.loc = cy+(e.loc-cy)*sy; if (e.mode==="linear-v" && e.loc != null) e.loc = cx+(e.loc-cx)*sx; break;
+        case "dim": if (e.mode === "arclength"){ const [ncx2,ncy2]=S(e.cx,e.cy); e.cx=ncx2; e.cy=ncy2; e.r*=Math.abs(sx); } else { [e.x1,e.y1]=S(e.x1,e.y1); [e.x2,e.y2]=S(e.x2,e.y2); if (e.x3 != null) [e.x3,e.y3]=S(e.x3,e.y3); e.off*=sy; if ((e.mode==="radius" || e.mode==="diameter") && e.r != null) e.r*=Math.abs(sx); if (e.mode==="linear-h" && e.loc != null) e.loc = cy+(e.loc-cy)*sy; if (e.mode==="linear-v" && e.loc != null) e.loc = cx+(e.loc-cx)*sx; } break;
       }
     }
     function distToSeg(px,py,x1,y1,x2,y2){
@@ -1634,6 +1704,19 @@
           return wx>=b.x1-tol && wx<=b.x2+tol && wy>=b.y1-tol && wy<=b.y2+tol;
         }
         case "dim": {
+          refreshAssocDim(e);
+          if (e.mode === "ordinate"){
+            const elbow = e.axis === "x" ? [e.x1, e.y2] : [e.x2, e.y1];
+            return distToSeg(wx,wy,e.x1,e.y1,elbow[0],elbow[1]) <= tol || distToSeg(wx,wy,elbow[0],elbow[1],e.x2,e.y2) <= tol;
+          }
+          if (e.mode === "arclength"){
+            const d0 = Math.hypot(wx-e.cx, wy-e.cy);
+            const rd = (e.r || 0) + Math.max(e.off || 0, 1);
+            if (Math.abs(d0 - rd) > tol) return false;
+            let a = Math.atan2(wy-e.cy, wx-e.cx), rel = a - (e.a0 || 0);
+            while (rel < 0) rel += Math.PI*2;
+            return rel <= Math.abs((e.a1||0) - (e.a0||0)) + 0.001;
+          }
           const d = dimGeom(e);
           return distToSeg(wx,wy,d.p1[0],d.p1[1],d.p2[0],d.p2[1]) <= tol ||
                  distToSeg(wx,wy,e.x1,e.y1,d.p1[0],d.p1[1]) <= tol ||
@@ -1665,6 +1748,14 @@
       if (mode === "radius" || mode === "diameter"){
         return { p1:[e.x1, e.y1], p2:[e.x2, e.y2], len: (e.r || 0) * (mode === "diameter" ? 2 : 1), ux: 1, uy: 0, nx: 0, ny: 1 };
       }
+      if (mode === "arclength"){
+        const rd = (e.r || 0) + Math.max(e.off || 0, 1);
+        const a0 = e.a0 || 0, a1 = (e.a1 != null ? e.a1 : a0);
+        return { p1:[e.cx + rd*Math.cos(a0), e.cy + rd*Math.sin(a0)], p2:[e.cx + rd*Math.cos(a1), e.cy + rd*Math.sin(a1)], len: (e.r || 0) * Math.abs(a1 - a0), ux: 1, uy: 0, nx: 0, ny: 1 };
+      }
+      if (mode === "ordinate"){
+        return { p1:[e.x1, e.y1], p2:[e.x2, e.y2], len: e.axis === "x" ? Math.abs(e.x1) : Math.abs(e.y1), ux: 1, uy: 0, nx: 0, ny: 1 };
+      }
       if (mode === "angular"){
         const a1 = e.a1 || 0, r = Math.abs(e.off || 0), a2 = a1 + (e.sweep || 0);
         return {
@@ -1680,6 +1771,57 @@
         p2:[e.x2+nx*e.off, e.y2+ny*e.off],
         len:L, ux, uy, nx, ny
       };
+    }
+    /* ---------- associative dimensions ----------
+       A dim may carry e.assoc = { a:{id,w|v}, b:{...}, c:{id} } recording the
+       source geometry its origins were picked from (an object pick, or an
+       endpoint snap). Before every draw/hit-test the origins re-read the
+       source entity's CURRENT coordinates, so the dimension follows when
+       the geometry is moved, stretched, rotated or scaled — AutoCAD's
+       associative behaviour. If the source is erased the association is
+       dropped and the dimension stays where it was. */
+    let lastPlacedDimId = null;
+    function assocPoint(ref){
+      if (!ref) return null;
+      const s = entities.find(x=> x.id === ref.id);
+      if (!s) return null;
+      if (s.type === "line") return ref.w === 2 ? [s.x2, s.y2] : [s.x1, s.y1];
+      if (s.type === "polyline" && s.pts[ref.v]) return [s.pts[ref.v][0], s.pts[ref.v][1]];
+      if ((s.type === "circle" || s.type === "arc") && ref.c) return [s.cx, s.cy];
+      return null;
+    }
+    function refreshAssocDim(e){
+      if (!e || e.type !== "dim" || !e.assoc) return;
+      const A = e.assoc;
+      if (e.mode === "radius" || e.mode === "diameter"){
+        const s = A.c && entities.find(x=> x.id === A.c.id);
+        if (s && (s.type === "circle" || s.type === "arc")){ e.x1 = s.cx; e.y1 = s.cy; e.r = s.r; }
+        else if (!s) e.assoc = null;
+        return;
+      }
+      let dead = false;
+      if (A.a){ const p = assocPoint(A.a); if (p){ e.x1 = p[0]; e.y1 = p[1]; } else dead = true; }
+      if (A.b){ const p = assocPoint(A.b); if (p){ e.x2 = p[0]; e.y2 = p[1]; } else dead = true; }
+      if (dead) e.assoc = null;
+    }
+    /* an endpoint/vertex/centre reference at a picked point, or null */
+    function endpointRefAt(w){
+      const tol = Math.max(6/Math.max(view.scale, 0.01), 0.5);
+      for (const s of entities){
+        if (!s || s.type === "dim" || s.type === "image") continue;
+        const l = layerById(s.layer);
+        if (l && !l.visible) continue;
+        if (s.type === "line"){
+          if (Math.hypot(w.x-s.x1, w.y-s.y1) <= tol) return { id: s.id, w: 1 };
+          if (Math.hypot(w.x-s.x2, w.y-s.y2) <= tol) return { id: s.id, w: 2 };
+        } else if (s.type === "polyline"){
+          for (let i = 0; i < s.pts.length; i++)
+            if (Math.hypot(w.x-s.pts[i][0], w.y-s.pts[i][1]) <= tol) return { id: s.id, v: i };
+        } else if ((s.type === "circle" || s.type === "arc") && Math.hypot(w.x-s.cx, w.y-s.cy) <= tol){
+          return { id: s.id, c: 1 };
+        }
+      }
+      return null;
     }
     /* ================= canvas & rendering ================= */
     const cv = $("#cv"); let ctx = cv.getContext("2d"); // let: drawDim swaps ctx for offscreen (print/SVG) rendering
@@ -1888,7 +2030,7 @@
     /* Radius / diameter dims: a leader from the circle (diameter: the full
        chord through the centre) with the R/Ø value at the placed point. */
     function drawDimRadial(e, color, scale, st, isDia){
-      const th = (st.textH && st.textH > 0) ? st.textH : Math.max(2.6, 11/scale);
+      const th = dimTHof(e, st, scale);
       const arrowLen = Math.max(0.8, st.arrowSize || 3);
       const cx = e.x1, cy = e.y1, r = e.r || 0;
       let dx = e.x2 - cx, dy = e.y2 - cy;
@@ -1912,7 +2054,9 @@
       const ang = Math.atan2(dy, dx);
       drawArrowHead(px, py, ang, st, color);
       if (isDia) drawArrowHead(cx - dx*r, cy - dy*r, ang + Math.PI, st, color);
-      const label = (e.textOverride && e.textOverride.trim()) ? e.textOverride : (isDia ? "Ø" : "R") + formatDimLen(isDia ? r*2 : r, st);
+      const parts = dimLabelParts(e, st, isDia ? r*2 : r);
+      const hasOvr = !!(e.textOverride && e.textOverride.trim());
+      const label = hasOvr ? e.textOverride : (isDia ? "Ø" : "R") + (parts.stack.length && !parts.main ? parts.stack.join(" / ") : parts.main + (parts.stack.length ? " " + parts.stack.join(" ") : ""));
       let ta = ang; if (ta > Math.PI/2 || ta < -Math.PI/2) ta += Math.PI;
       ctx.save();
       ctx.translate(e.x2 + dx*th*0.35, e.y2 + dy*th*0.35);
@@ -1928,7 +2072,7 @@
     /* Angular dim: extension lines from the vertex along both sides, an
        arc between them, arrows at the arc ends, degree text at the arc. */
     function drawDimAngular(e, color, scale, st){
-      const th = (st.textH && st.textH > 0) ? st.textH : Math.max(2.6, 11/scale);
+      const th = dimTHof(e, st, scale);
       const arrowLen = Math.max(0.8, st.arrowSize || 3);
       const vx = e.x1, vy = e.y1;
       const a1 = e.a1 || 0, sweep = e.sweep || 0, a2 = a1 + sweep;
@@ -1967,6 +2111,69 @@
       ctx.restore();
       ctx.restore();
     }
+    /* Ordinate dim: datum = the UCS origin (0,0). The leader runs from the
+       feature point through an elbow to the text point; an X ordinate has a
+       (mostly) vertical leader and shows the point's X coordinate, a Y
+       ordinate the reverse (AutoCAD's rule). */
+    function drawDimOrdinate(e, color, scale, st){
+      const th = dimTHof(e, st, scale);
+      ctx.save();
+      ctx.strokeStyle = color; ctx.fillStyle = color;
+      ctx.lineWidth = Math.max(0.22, 0.55/scale);
+      ctx.setLineDash([]);
+      const elbow = e.axis === "x" ? [e.x1, e.y2] : [e.x2, e.y1];
+      ctx.beginPath();
+      ctx.moveTo(e.x1, e.y1); ctx.lineTo(elbow[0], elbow[1]); ctx.lineTo(e.x2, e.y2);
+      ctx.stroke();
+      const val = e.axis === "x" ? e.x1 : e.y1;
+      const parts = dimLabelParts(e, st, val);
+      ctx.font = `600 ${th}px "Avenir Next","Segoe UI",system-ui,sans-serif`;
+      ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      const dirx = Math.sign(e.x2 - e.x1) || 1, diry = Math.sign(e.y2 - e.y1) || 1;
+      const tx = e.x2 + (e.axis === "x" ? 0 : dirx*th*0.4), ty = e.y2 + (e.axis === "x" ? diry*th*0.55 : 0);
+      const text = parts.stack.length && !parts.main ? parts.stack.join(" / ") : parts.main + (parts.stack.length ? " " + parts.stack.join(" ") : "");
+      ctx.fillText(text, tx, ty);
+      ctx.restore();
+    }
+    /* Arclength dim: a dimension arc concentric with the source arc, arrow
+       heads tangential at both arc ends, value = centreline arc length. */
+    function drawDimArcLen(e, color, scale, st){
+      const th = dimTHof(e, st, scale);
+      const rd = (e.r || 0) + Math.max(e.off || 0, th*1.2);
+      const a0 = e.a0 || 0, a1 = (e.a1 != null ? e.a1 : a0);
+      ctx.save();
+      ctx.strokeStyle = color; ctx.fillStyle = color;
+      ctx.lineWidth = Math.max(0.22, 0.55/scale);
+      ctx.setLineDash([]);
+      [a0, a1].forEach(a=>{
+        const ux = Math.cos(a), uy = Math.sin(a);
+        const g = Math.min(st.extOffset || 0, rd*0.4);
+        ctx.beginPath();
+        ctx.moveTo(e.cx + ux*(e.r + g), e.cy + uy*(e.r + g));
+        ctx.lineTo(e.cx + ux*(rd + (st.extOver || 0)), e.cy + uy*(rd + (st.extOver || 0)));
+        ctx.stroke();
+      });
+      ctx.beginPath();
+      ctx.arc(e.cx, e.cy, rd, a0, a1, false);
+      ctx.stroke();
+      const t1 = [-Math.sin(a1), Math.cos(a1)], t0 = [Math.sin(a0), -Math.cos(a0)];
+      drawArrowHead(e.cx + rd*Math.cos(a1), e.cy + rd*Math.sin(a1), Math.atan2(t1[1], t1[0]), st, color);
+      drawArrowHead(e.cx + rd*Math.cos(a0), e.cy + rd*Math.sin(a0), Math.atan2(t0[1], t0[0]), st, color);
+      const mid = (a0 + a1)/2;
+      const val = (e.r || 0) * Math.abs(a1 - a0);
+      const parts = dimLabelParts(e, st, val);
+      const text = parts.stack.length && !parts.main ? parts.stack.join(" / ") : parts.main;
+      let ta = mid + Math.PI/2; if (ta > Math.PI/2 || ta < -Math.PI/2) ta += Math.PI;
+      ctx.save();
+      ctx.translate(e.cx + (rd + th*0.85)*Math.cos(mid), e.cy + (rd + th*0.85)*Math.sin(mid));
+      ctx.rotate(ta);
+      ctx.scale(1, -1);
+      ctx.font = `600 ${th}px "Avenir Next","Segoe UI",system-ui,sans-serif`;
+      ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.fillText("⌒ " + text, 0, 0);
+      ctx.restore();
+      ctx.restore();
+    }
     function drawDim(e, color, C, sc){
       C = C || ctx;
       const prevCtx = ctx;
@@ -1976,13 +2183,17 @@
       } finally { ctx = prevCtx; }
     }
     function drawDimImpl(e, color, scale){
-      const st = dimStyleOf(e);
+      refreshAssocDim(e);
+      const st0 = dimStyleOf(e);
+      const st = Object.assign({}, st0, { arrowSize: (st0.arrowSize || 3) * (st0.globalScale || 1) });
       const mode = e.mode || "aligned";
       if (mode === "radius") return drawDimRadial(e, color, scale, st, false);
       if (mode === "diameter") return drawDimRadial(e, color, scale, st, true);
       if (mode === "angular") return drawDimAngular(e, color, scale, st);
+      if (mode === "ordinate") return drawDimOrdinate(e, color, scale, st);
+      if (mode === "arclength") return drawDimArcLen(e, color, scale, st);
       const d = dimGeom(e);
-      const th = (st.textH && st.textH > 0) ? st.textH : Math.max(2.6, 11/scale);
+      const th = dimTHof(e, st0, scale);
       const arrowLen = Math.max(0.8, st.arrowSize || 3);
       const arrowIn = d.len >= arrowLen*2.6 || st.arrow === "tick";
       ctx.save();
@@ -2014,28 +2225,40 @@
         drawArrowHead(d.p2[0]+d.ux*arrowLen, d.p2[1]+d.uy*arrowLen, ang+Math.PI, st, color);
       }
       // text
-      const label = (e.textOverride && e.textOverride.trim()) ? e.textOverride : formatDimLen(d.len, st);
+      const parts = dimLabelParts(e, st0, d.len);
+      const label = parts.main;
       ctx.font = `600 ${th}px "Avenir Next","Segoe UI",system-ui,sans-serif`;
       const tw = ctx.measureText(label).width;
+      const stackW = parts.stack.length ? Math.max(...parts.stack.map(s=>ctx.measureText(s).width * (1/0.62))) * 0.62 : 0;
       const mx = (d.p1[0]+d.p2[0])/2, my = (d.p1[1]+d.p2[1])/2;
       let ta = ang; if (ta > Math.PI/2 || ta < -Math.PI/2) ta += Math.PI;
       const above = st.textPlace !== "inline";
       ctx.save();
       ctx.translate(mx,my);
-      if (above) ctx.translate(-Math.sin(ta)*0, 0); // placeholder (offset applied below in rotated frame)
       ctx.rotate(ta);
       // offset text above the line in the line's local (unflipped) frame: local +Y is world "left of direction"
-      const yOff = above ? th*0.45 : 0;
+      const yOff = above ? th*0.45 + (st.textOffset || 0)*0.3 : 0;
       ctx.translate(0, yOff);
       ctx.scale(1,-1);
       ctx.textAlign = "center"; ctx.textBaseline = above ? "bottom" : "middle";
+      const totalW = tw + (parts.stack.length ? th*0.35 + stackW : 0);
       if (!above){
         const bgc = paperBgOverride || CANVAS_BG[settings.bg].bg;
         ctx.fillStyle = bgc;
-        ctx.fillRect(-tw/2 - th*0.25, -th*0.62, tw + th*0.5, th*1.24);
+        ctx.fillRect(-totalW/2 - th*0.25, -th*0.62, totalW + th*0.5, th*1.24);
       }
       ctx.fillStyle = color;
-      ctx.fillText(label, 0, above ? -th*0.08 : 0);
+      if (label) ctx.fillText(label, parts.stack.length ? -stackW/2 - th*0.17 : 0, above ? -th*0.08 : 0);
+      if (parts.stack.length){
+        // tolerance pair stacked small, right of the measured value
+        ctx.font = `600 ${th*0.62}px "Avenir Next","Segoe UI",system-ui,sans-serif`;
+        ctx.textAlign = "left";
+        const sx2 = tw/2 + th*0.3 - (label ? 0 : stackW/2 + th*0.1);
+        ctx.textBaseline = "bottom";
+        ctx.fillText(parts.stack[0], sx2, -th*0.10);
+        ctx.textBaseline = "top";
+        ctx.fillText(parts.stack[1], sx2, th*0.14);
+      }
       ctx.restore();
       ctx.restore();
     }
@@ -2410,7 +2633,16 @@
         case "spline": e.pts.forEach((p,i)=> push(p[0],p[1],"vertex",{i})); break;
         case "point": push(e.x,e.y,"vertex",{}); break;
         case "text": push(e.x,e.y,"vertex",{}); break;
-        case "dim": push(e.x1,e.y1,"dimPt",{which:1}); push(e.x2,e.y2,"dimPt",{which:2}); break;
+        case "dim": {
+          if (e.mode === "arclength"){
+            push(e.cx,e.cy,"center",{});
+            push(e.cx+e.r*Math.cos(e.a0||0), e.cy+e.r*Math.sin(e.a0||0), "arcEnd", {which:0});
+            push(e.cx+e.r*Math.cos(e.a1||0), e.cy+e.r*Math.sin(e.a1||0), "arcEnd", {which:1});
+          } else {
+            push(e.x1,e.y1,"dimPt",{which:1}); push(e.x2,e.y2,"dimPt",{which:2});
+          }
+          break;
+        }
       }
       return g;
     }
@@ -2614,6 +2846,11 @@
       { id:"sep3" },
       { id:"text", name:"Text", key:"T", icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 5h14M12 5v14"/></svg>' },
       { id:"dim", name:"Dimension", key:"DIM", icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 16h16M4 16l3-2M4 16l3 2M20 16l-3-2M20 16l-3 2M4 12v8M20 12v8"/></svg>' },
+      { id:"dimbaseline", name:"Baseline", key:"DBA", icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 8h16M4 12h12M4 16h9M4 5v14"/></svg>' },
+      { id:"dimcontinue", name:"Continue", key:"DCO", icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 10h7M11 10h9M4 6v8M11 6v8M20 6v8M15.5 14h4.5"/></svg>' },
+      { id:"dimordinate", name:"Ordinate", key:"DOR", icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="8" cy="15" r="1.4"/><path d="M8 15v-6h8"/></svg>' },
+      { id:"dimarc", name:"Arc Length", key:"DAR", icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 17a9 9 0 0 1 14 0M5 17l-1-3M19 17l1-3"/></svg>' },
+      { id:"dimcenter", name:"Center Mark", key:"DCE", icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="7"/><path d="M12 3v18M3 12h18"/></svg>' },
       { id:"point", name:"Point", key:"PO", icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="2" fill="currentColor" stroke="none"/><path d="M12 4v4M12 16v4M4 12h4M16 12h4"/></svg>' },
       { id:"viewport", name:"Viewport", key:"", icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14"/><rect x="7" y="9" width="10" height="6"/></svg>' },
     ];
@@ -2649,12 +2886,12 @@
       fillet: "Type a radius (Enter; 0 = sharp corner), then click two lines.",
       chamfer: "Type a distance (Enter), then click two lines.",
       array: "Rectangular array: type rows, columns and spacings when prompted.",
-      viewport: "Layouts only: drag a rectangle on the sheet to create a viewport."
+      viewport: "MVIEW: specify the first corner of the viewport on the sheet, then drag to the opposite corner."
     };
     const MODIFY_TOOLS = ["move","copy","rotate","scale","mirror","stretch","offset","trim","extend","fillet","chamfer","array","explode","join","break","divide","measure","lengthen","align","hatch","matchprop"];
     // Dimension commands run on the same cmd machinery (exact AutoCAD
     // prompt sequences, no settings asked mid-flow — styling is DIMSTYLE's job).
-    const DIM_CMDS = ["dimlinear","dimaligned","dimradius","dimdiameter","dimangular"];
+    const DIM_CMDS = ["dimlinear","dimaligned","dimradius","dimdiameter","dimangular","dim","dimbaseline","dimcontinue","dimordinate","dimarc","dimcenter","dimedit"];
     function setCmdLine(text){
       // The command window keeps a scrolling history: each prompt moves up
       // into the lines above the input when the next one is issued.
@@ -2678,9 +2915,19 @@
       } else if (MODIFY_TOOLS.includes(t)){
         startCmd(t);
       } else if (t === "dim" || DIM_CMDS.includes(t)){
-        startCmd(t === "dim" ? "dimlinear" : t);
+        startCmd(t);
       } else if (t === "viewport" && !layoutMode()){
-        setCmdLine("Viewports live on layout sheets — click a Layout tab below the canvas first.");
+        // MVIEW from Model space: AutoCAD places viewports on a sheet, so
+        // jump to the first layout and arm the viewport tool there.
+        if (layouts.length){
+          switchTab(layouts[0].id);
+          tool = "viewport";
+          document.querySelectorAll(".rtool").forEach(b=> b.classList.toggle("active", b.dataset.tool === "viewport"));
+          cv.style.cursor = "none";
+          setCmdLine(HINTS.viewport);
+        } else {
+          setCmdLine("No layout sheet yet — add one with the + tab below the canvas, then run MVIEW.");
+        }
       } else {
         setCmdLine(HINTS[t] || "");
       }
@@ -2695,7 +2942,7 @@
       panelHomeView: ["select","pan"],
       panelInsert: ["viewport"],
       panelAnnText: ["text"],
-      panelAnnDim: ["dim"]
+      panelAnnDim: ["dim","dimbaseline","dimcontinue","dimordinate","dimarc","dimcenter"]
     };
     function buildRibbon(){
       const byId = {};
@@ -3765,10 +4012,15 @@
     }
     function capitalize(s){ return s.charAt(0).toUpperCase() + s.slice(1); }
     /* ---- dimension command helpers (AutoCAD flows) ---- */
+    let gDimAssoc = null; // assoc refs for the dim being placed (consumed by finishDimCmd)
     function finishDimCmd(e){
       if (!e) return;
+      if (gDimAssoc && e.mode !== "radius" && e.mode !== "diameter" && !e.assoc) e.assoc = gDimAssoc;
+      gDimAssoc = null;
       pushHistory();
       entities.push(e);
+      lastPlacedDimId = e.id;
+      selection = new Set([e.id]);
       updateCounts();
       setTool("select");
       setCmdLine("Dimension placed. " + HINTS.select);
@@ -3833,6 +4085,41 @@
       const t = ((l2.x1-l1.x1)*d2y - (l2.y1-l1.y1)*d2x) / den;
       return [l1.x1 + d1x*t, l1.y1 + d1y*t];
     }
+    /* ---- DIMBASELINE / DIMCONTINUE sources ----
+       BASELINE steps each new dimension line away from the shared first
+       origin by the style's baseline spacing; CONTINUE chains from the
+       source dimension's second origin on the same dimension line. */
+    function findSourceDim(){
+      const sel = [...selection].map(id=> entities.find(e=> e.id === id)).find(e=> e && e.type === "dim" && (e.mode === "linear-h" || e.mode === "linear-v" || e.mode === "aligned"));
+      if (sel) return sel;
+      const last = entities.find(e=> e.id === lastPlacedDimId);
+      return last && (last.mode === "linear-h" || last.mode === "linear-v" || last.mode === "aligned") ? last : null;
+    }
+    function makeChainedDim(src, w, baseline, count){
+      refreshAssocDim(src);
+      const st = dimStyleOf(src);
+      const space = Math.max(2, (st.baseline || 9.5) * (st.globalScale || 1));
+      const x1 = baseline ? src.x1 : src.x2, y1 = baseline ? src.y1 : src.y2;
+      const e = newEntity("dim", { x1, y1, x2: w.x, y2: w.y, style: src.style, textOverride: "" });
+      if (src.mode === "linear-h"){
+        e.mode = "linear-h"; e.off = 0;
+        const srcLoc = src.loc != null ? src.loc : src.y1 + (src.off || 0);
+        const side = srcLoc >= (src.y1 + src.y2)/2 ? 1 : -1;
+        e.loc = baseline ? srcLoc + side * count * space : srcLoc;
+      } else if (src.mode === "linear-v"){
+        e.mode = "linear-v"; e.off = 0;
+        const srcLoc = src.loc != null ? src.loc : src.x1 + (src.off || 0);
+        const side = srcLoc >= (src.x1 + src.x2)/2 ? 1 : -1;
+        e.loc = baseline ? srcLoc + side * count * space : srcLoc;
+      } else {
+        e.mode = "aligned";
+        e.off = baseline ? (src.off || 0) + Math.sign(src.off || 1) * count * space : (src.off || 0);
+      }
+      const refB = endpointRefAt(w);
+      if (baseline){ if (src.assoc && src.assoc.a) e.assoc = { a: src.assoc.a }; if (refB) e.assoc = Object.assign({}, e.assoc, { b: refB }); }
+      else { if (src.assoc && src.assoc.b) e.assoc = { a: src.assoc.b }; if (refB) e.assoc = Object.assign({}, e.assoc, { b: refB }); }
+      return e;
+    }
     function beginCmdStep(name){
       cmd.originals = snapshotSelection();
       if (name === "move" || name === "copy"){ cmd.step = "base"; cmd.base = null; cmd.viaDisplacement = false; setCmdLine("Specify base point or [Displacement] <Displacement>:"); }
@@ -3855,6 +4142,17 @@
       else if (name === "align"){ cmd.step = "src1"; setCmdLine("Specify first source point:"); }
       else if (name === "measure"){ cmd.step = "pick"; setCmdLine("Measure: select object to measure:"); }
       else if (name === "dimlinear" || name === "dimaligned"){ cmd.step = "origin1"; cmd.kind = name === "dimlinear" ? "linear" : "aligned"; setCmdLine("Specify first extension line origin or <select object>:"); }
+      else if (name === "dim"){ cmd.step = "pick"; setCmdLine("Select object to dimension or specify first extension line origin:"); }
+      else if (name === "dimbaseline" || name === "dimcontinue"){
+        const src = findSourceDim();
+        if (!src){ setTool("select"); setCmdLine("Select a linear or aligned dimension first (or place one), then run " + (name === "dimbaseline" ? "DIMBASELINE" : "DIMCONTINUE") + "."); return; }
+        cmd.srcId = src.id; cmd.count = 0; cmd.step = "origin2";
+        setCmdLine(name === "dimbaseline" ? "Baseline: specify a second extension line origin:" : "Continue: specify a second extension line origin:");
+      }
+      else if (name === "dimordinate"){ cmd.step = "origin"; setCmdLine("Specify feature location:"); }
+      else if (name === "dimarc"){ cmd.step = "pick"; setCmdLine("Select arc:"); }
+      else if (name === "dimcenter"){ cmd.step = "pick"; setCmdLine("Select arc or circle:"); }
+      else if (name === "dimedit"){ cmd.step = "pick"; setCmdLine("Select dimension to edit:"); }
       else if (name === "dimradius" || name === "dimdiameter"){ cmd.step = "pick"; cmd.kind = name === "dimradius" ? "radius" : "diameter"; setCmdLine("Select arc or circle:"); }
       else if (name === "dimangular"){ cmd.step = "pick"; setCmdLine("Select arc, circle, line, or <specify vertex>:"); }
       else if (name === "hatch"){ cmd.step = "pick"; setCmdLine("Hatch: pick a closed object — rectangle, circle, ellipse or closed polyline (click its edge or inside it):"); }
@@ -4013,6 +4311,20 @@
         return true;
       }
       if (cmd.name === "mirror" && cmd.step === "eraseSrc"){ mirrorEraseAnswer(false); return true; }
+      if (cmd.name === "dim" && cmd.step === "pick"){
+        // Enter at DIM's first prompt drops to the manual two-origin flow
+        cmd.step = "origin1";
+        setCmdLine("Specify first extension line origin:");
+        draw();
+        return true;
+      }
+      if ((cmd.name === "dimbaseline" || cmd.name === "dimcontinue") && cmd.step === "origin2"){
+        const n = cmd.count || 0;
+        setTool("select");
+        setCmdLine(n ? (cmd.name === "dimbaseline" ? "Baseline" : "Continue") + ": placed " + n + " dimension" + (n > 1 ? "s" : "") + ". " + HINTS.select
+                     : "No dimensions placed. " + HINTS.select);
+        return true;
+      }
       if ((cmd.name === "dimlinear" || cmd.name === "dimaligned") && cmd.step === "origin1"){
         // Enter at "…or <select object>:" switches to object picking (AutoCAD).
         cmd.step = "selobj";
@@ -4117,6 +4429,21 @@
         drawEntity(newEntity("dim", { x1: cmd.c[0], y1: cmd.c[1], x2: pt.x, y2: pt.y, r: cmd.r, off: 0, mode: cmd.kind, style: currentDimStyleId, textOverride: "" }), { alpha: 0.8 });
       } else if (cmd.name === "dimangular" && cmd.step === "place" && cmd.v && cmd.ra && cmd.rb){
         drawEntity(buildAngularDim(cmd.v, cmd.ra, cmd.rb, pt), { alpha: 0.8 });
+      } else if (cmd.name === "dim" && cmd.step === "place" && cmd.p1 && cmd.p2){
+        drawEntity(makeLinearDim(cmd.p1, cmd.p2, pt, "linear"), { alpha: 0.8 });
+      } else if (cmd.name === "dim" && cmd.step === "origin2" && cmd.p1){
+        ctx.strokeStyle = "#22d3ee"; ctx.lineWidth = 1/view.scale; ctx.setLineDash([5/view.scale,4/view.scale]);
+        ctx.beginPath(); ctx.moveTo(cmd.p1[0], cmd.p1[1]); ctx.lineTo(pt.x, pt.y); ctx.stroke();
+        ctx.setLineDash([]);
+      } else if ((cmd.name === "dimbaseline" || cmd.name === "dimcontinue") && cmd.step === "origin2" && cmd.srcId){
+        const src = entities.find(e=> e.id === cmd.srcId);
+        if (src) drawEntity(makeChainedDim(src, pt, cmd.name === "dimbaseline", (cmd.count || 0) + 1), { alpha: 0.8 });
+      } else if (cmd.name === "dimordinate" && cmd.step === "loc" && cmd.p1){
+        const axis = Math.abs(pt.y - cmd.p1[1]) >= Math.abs(pt.x - cmd.p1[0]) ? "x" : "y";
+        drawEntity(newEntity("dim", { x1: cmd.p1[0], y1: cmd.p1[1], x2: pt.x, y2: pt.y, off: 0, mode: "ordinate", axis, style: currentDimStyleId, textOverride: "" }), { alpha: 0.8 });
+      } else if (cmd.name === "dimarc" && cmd.step === "place" && cmd.c){
+        const off = Math.max(1, Math.hypot(pt.x - cmd.c[0], pt.y - cmd.c[1]) - cmd.r);
+        drawEntity(newEntity("dim", { cx: cmd.c[0], cy: cmd.c[1], r: cmd.r, a0: cmd.a0, a1: cmd.a1, off, mode: "arclength", style: currentDimStyleId, textOverride: "" }), { alpha: 0.8 });
       } else if (cmd.name === "dimangular" && cmd.v && (cmd.step === "side1" || cmd.step === "side2" || cmd.step === "line2")){
         ctx.strokeStyle = "#22d3ee"; ctx.lineWidth = 1/view.scale; ctx.setLineDash([5/view.scale,4/view.scale]);
         ctx.beginPath(); ctx.moveTo(cmd.v[0], cmd.v[1]); ctx.lineTo(pt.x, pt.y); ctx.stroke();
@@ -4235,6 +4562,7 @@
         case "point": [c.x,c.y]=R(c.x,c.y); break;
         case "text": [c.x,c.y]=R(c.x,c.y); c.rot = 2*phi - (c.rot||0); break;
         case "dim": {
+          if (c.mode === "arclength"){ [c.cx,c.cy]=R(c.cx,c.cy); const b0 = 2*phi - c.a1, b1 = 2*phi - c.a0; c.a0 = b0; c.a1 = b1; break; }
           const wasLinear = (c.mode === "linear-h" || c.mode === "linear-v");
           const oldLinePt = wasLinear ? dimGeom(c).p1 : null;
           [c.x1,c.y1]=R(c.x1,c.y1); [c.x2,c.y2]=R(c.x2,c.y2);
@@ -4264,8 +4592,14 @@
           const seg = hit ? dimObjectPoints(hit, w) : null;
           if (!seg){ setCmdLine("Select object to dimension:"); return; }
           cmd.p1 = seg[0]; cmd.p2 = seg[1]; cmd.step = "place"; setCmdLine("Specify dimension line location:");
+          if (hit.type === "line") cmd.assocRef = { a:{ id: hit.id, w: 1 }, b:{ id: hit.id, w: 2 } };
+          else if (hit.type === "polyline"){
+            const i1 = hit.pts.findIndex(p=> p[0] === seg[0][0] && p[1] === seg[0][1]);
+            const i2 = hit.pts.findIndex(p=> p[0] === seg[1][0] && p[1] === seg[1][1]);
+            if (i1 >= 0 && i2 >= 0) cmd.assocRef = { a:{ id: hit.id, v: i1 }, b:{ id: hit.id, v: i2 } };
+          }
         }
-        else if (cmd.step === "place"){ finishDimCmd(makeLinearDim(cmd.p1, cmd.p2, w, cmd.kind)); }
+        else if (cmd.step === "place"){ const de = makeLinearDim(cmd.p1, cmd.p2, w, cmd.kind); if (cmd.assocRef) de.assoc = cmd.assocRef; finishDimCmd(de); }
         draw();
         return;
       }
@@ -4273,10 +4607,12 @@
         if (cmd.step === "pick"){
           const hit = hitPick(w);
           if (!hit || (hit.type !== "circle" && hit.type !== "arc")){ setCmdLine("Select arc or circle:"); return; }
-          cmd.c = [hit.cx, hit.cy]; cmd.r = hit.r; cmd.step = "place"; setCmdLine("Specify dimension line location:");
+          cmd.c = [hit.cx, hit.cy]; cmd.r = hit.r; cmd.assocRef = { c:{ id: hit.id } }; cmd.step = "place"; setCmdLine("Specify dimension line location:");
         }
         else if (cmd.step === "place"){
-          finishDimCmd(newEntity("dim", { x1: cmd.c[0], y1: cmd.c[1], x2: w.x, y2: w.y, r: cmd.r, off: 0, mode: cmd.kind, style: currentDimStyleId, textOverride: "" }));
+          const de = newEntity("dim", { x1: cmd.c[0], y1: cmd.c[1], x2: w.x, y2: w.y, r: cmd.r, off: 0, mode: cmd.kind, style: currentDimStyleId, textOverride: "" });
+          if (cmd.assocRef) de.assoc = cmd.assocRef;
+          finishDimCmd(de);
         }
         draw();
         return;
@@ -4307,6 +4643,124 @@
           cmd.v = vx; cmd.ra = cmd.pick1; cmd.rb = [w.x, w.y]; cmd.step = "place"; setCmdLine("Specify dimension arc line location:");
         }
         else if (cmd.step === "place"){ finishDimCmd(buildAngularDim(cmd.v, cmd.ra, cmd.rb, w)); }
+        draw();
+        return;
+      }
+      if (name === "dimedit"){
+        if (cmd.step === "pick"){
+          const hit = hitPick(w);
+          if (hit && hit.type === "dim"){
+            selection = new Set([hit.id]);
+            renderProps();
+            const el = $("#gDimText");
+            setTool("select");
+            setCmdLine("DIMEDIT: edit the label in the Properties panel — blank keeps the measured value. The dimension keeps its placement and style.");
+            if (el) setTimeout(()=>{ try { el.focus(); el.select(); } catch(_){} }, 30);
+          } else setCmdLine("Select dimension to edit:");
+        }
+        draw();
+        return;
+      }
+      if (name === "dim"){
+        // AutoCAD DIM: the object under the cursor chooses the dimension
+        // type — circle → diameter, arc → radius, line/segment → linear;
+        // empty space starts the classic two-origin linear flow.
+        if (cmd.step === "pick"){
+          const hit = hitPick(w);
+          if (hit && hit.type === "circle"){
+            cmd.name = "dimdiameter"; cmd.c = [hit.cx, hit.cy]; cmd.r = hit.r; cmd.kind = "diameter";
+            cmd.assocRef = { c:{ id: hit.id } }; cmd.step = "place";
+            setCmdLine("Specify dimension line location:");
+          } else if (hit && hit.type === "arc"){
+            cmd.name = "dimradius"; cmd.c = [hit.cx, hit.cy]; cmd.r = hit.r; cmd.kind = "radius";
+            cmd.assocRef = { c:{ id: hit.id } }; cmd.step = "place";
+            setCmdLine("Specify dimension line location:");
+          } else if (hit && (hit.type === "line" || hit.type === "polyline" || hit.type === "rect")){
+            const seg = dimObjectPoints(hit, w);
+            if (seg){
+              cmd.p1 = seg[0]; cmd.p2 = seg[1]; cmd.kind = "linear";
+              if (hit.type === "line") cmd.assocRef = { a:{ id: hit.id, w: 1 }, b:{ id: hit.id, w: 2 } };
+              else if (hit.type === "polyline"){
+                const i1 = hit.pts.findIndex(p=> p[0] === seg[0][0] && p[1] === seg[0][1]);
+                const i2 = hit.pts.findIndex(p=> p[0] === seg[1][0] && p[1] === seg[1][1]);
+                if (i1 >= 0 && i2 >= 0) cmd.assocRef = { a:{ id: hit.id, v: i1 }, b:{ id: hit.id, v: i2 } };
+              }
+              cmd.step = "place"; setCmdLine("Specify dimension line location:");
+            } else { cmd.p1 = [w.x, w.y]; cmd.refA = endpointRefAt(w); cmd.step = "origin2"; setCmdLine("Specify second extension line origin:"); }
+          } else {
+            cmd.p1 = [w.x, w.y]; cmd.refA = endpointRefAt(w); cmd.step = "origin2"; setCmdLine("Specify second extension line origin:");
+          }
+        }
+        else if (cmd.step === "origin1"){ cmd.p1 = [w.x, w.y]; cmd.refA = endpointRefAt(w); cmd.step = "origin2"; setCmdLine("Specify second extension line origin:"); }
+        else if (cmd.step === "origin2"){ cmd.p2 = [w.x, w.y]; cmd.refB = endpointRefAt(w); cmd.kind = "linear"; cmd.step = "place"; setCmdLine("Specify dimension line location:"); }
+        else if (cmd.step === "place"){
+          const de = makeLinearDim(cmd.p1, cmd.p2, w, cmd.kind);
+          if (cmd.assocRef) de.assoc = cmd.assocRef;
+          else if (cmd.refA && cmd.refB) de.assoc = { a: cmd.refA, b: cmd.refB };
+          else if (cmd.refA) de.assoc = { a: cmd.refA };
+          finishDimCmd(de);
+        }
+        draw();
+        return;
+      }
+      if (name === "dimbaseline" || name === "dimcontinue"){
+        if (cmd.step === "origin2"){
+          const src = entities.find(e=> e.id === cmd.srcId);
+          if (!src){ setTool("select"); setCmdLine("Source dimension is gone — command cancelled."); return; }
+          cmd.count++;
+          const e = makeChainedDim(src, w, name === "dimbaseline", cmd.count);
+          if (e){
+            pushHistory();
+            entities.push(e);
+            lastPlacedDimId = e.id;
+            selection = new Set([e.id]);
+            updateCounts();
+            setCmdLine((name === "dimbaseline" ? "Baseline" : "Continue") + ": specify the next extension line origin, or press Enter to finish.");
+          }
+        }
+        draw();
+        return;
+      }
+      if (name === "dimordinate"){
+        if (cmd.step === "origin"){ cmd.p1 = [w.x, w.y]; cmd.refA = endpointRefAt(w); cmd.step = "loc"; setCmdLine("Specify leader endpoint:"); }
+        else if (cmd.step === "loc"){
+          const axis = Math.abs(w.y - cmd.p1[1]) >= Math.abs(w.x - cmd.p1[0]) ? "x" : "y";
+          const de = newEntity("dim", { x1: cmd.p1[0], y1: cmd.p1[1], x2: w.x, y2: w.y, off: 0, mode: "ordinate", axis, style: currentDimStyleId, textOverride: "" });
+          if (cmd.refA) de.assoc = { a: cmd.refA };
+          finishDimCmd(de);
+        }
+        draw();
+        return;
+      }
+      if (name === "dimarc"){
+        if (cmd.step === "pick"){
+          const hit = hitPick(w);
+          if (!hit || hit.type !== "arc"){ setCmdLine(hit && hit.type === "circle" ? "Select an arc — DIMARC measures an arc's length (circles have no single arc)." : "Select arc:"); return; }
+          cmd.c = [hit.cx, hit.cy]; cmd.r = hit.r; cmd.a0 = hit.a0; cmd.a1 = hit.a1; cmd.step = "place"; setCmdLine("Specify dimension arc location:");
+        }
+        else if (cmd.step === "place"){
+          const off = Math.max(1, Math.hypot(w.x - cmd.c[0], w.y - cmd.c[1]) - cmd.r);
+          finishDimCmd(newEntity("dim", { cx: cmd.c[0], cy: cmd.c[1], r: cmd.r, a0: cmd.a0, a1: cmd.a1, off, mode: "arclength", style: currentDimStyleId, textOverride: "" }));
+        }
+        draw();
+        return;
+      }
+      if (name === "dimcenter"){
+        if (cmd.step === "pick"){
+          const hit = hitPick(w);
+          if (hit && (hit.type === "circle" || hit.type === "arc")){
+            const st = currentDimStyle();
+            const half = (hit.r || 0) + Math.max(2, (st.textH || 3) * (st.globalScale || 1));
+            pushHistory();
+            const l1 = newEntity("line", { x1: hit.cx - half, y1: hit.cy, x2: hit.cx + half, y2: hit.cy });
+            const l2 = newEntity("line", { x1: hit.cx, y1: hit.cy - half, x2: hit.cx, y2: hit.cy + half });
+            entities.push(l1, l2);
+            selection = new Set([l1.id, l2.id]);
+            updateCounts();
+            setTool("select");
+            setCmdLine("Centre mark placed. " + HINTS.select);
+          } else setCmdLine("Select arc or circle:");
+        }
         draw();
         return;
       }
@@ -5643,6 +6097,9 @@
           h += `<div class="field"><label>Dimension style</label><select id="gDimStyle">` +
             dimStyles.map(s=>`<option value="${s.id}" ${s.id===st.id?"selected":""}>${escapeHtml(s.name)}</option>`).join("") + `</select></div>`;
           h += `<div class="field"><label>Label override (blank = measured)</label><input type="text" id="gDimText" value="${escapeHtml(e.textOverride||"")}" /></div>`;
+          h += `<div class="field"><label>Text height override (blank = style)</label><input type="text" id="gThO" value="${e.thO > 0 ? fmtInput(e.thO) : ""}" /></div>`;
+          h += `<p class="empty-note">${e.assoc ? "Associative — this dimension follows its source geometry when it is moved or edited." : "Not associative (picked in empty space, or its source was erased)."}</p>`;
+          if (e.assoc) h += `<button class="btn" id="gBreakAssoc">Break association</button>`;
           if (!e.mode || e.mode === "aligned") h += fieldHTML("Line offset","gOff",F(e.off));
           else if (e.mode === "linear-h" || e.mode === "linear-v") h += fieldHTML(e.mode === "linear-h" ? "Dimension line Y" : "Dimension line X", "gLoc", F(e.loc != null ? e.loc : 0));
           break;
@@ -5727,6 +6184,10 @@
         if (e.type==="dim"){
           bindLen("gOff", ()=>fmtInput(e.off), v=> e.off = v);
           bindLen("gLoc", ()=>fmtInput(e.loc), v=> e.loc = v);
+          const gth = $("#gThO");
+          if (gth) gth.addEventListener("change", ()=>{ pushHistorySoft(); const v = parseLen(gth.value); e.thO = (v != null && v > 0) ? v : 0; renderProps(); draw(); });
+          const gba = $("#gBreakAssoc");
+          if (gba) gba.addEventListener("click", ()=>{ pushHistorySoft(); delete e.assoc; renderProps(); draw(); setCmdLine("Association broken — the dimension now keeps its own fixed origins."); });
           const gst = $("#gDimStyle");
           if (gst) gst.addEventListener("change", ()=>{ pushHistorySoft(); e.style = gst.value; renderProps(); draw(); });
           const gdt = $("#gDimText");
@@ -6289,6 +6750,12 @@
           selFieldHTML("Precision","dsPrec",precOpts, s.precision) +
         `</div>` +
         `<div class="field-row">${fieldHTML("Extension offset (gap)","dsExtOff",fmtInput(s.extOffset))}${fieldHTML("Extension overshoot","dsExtOver",fmtInput(s.extOver))}</div>` +
+        `<div class="field-row">${fieldHTML("Global fit scale","dsGScale",String(s.globalScale != null ? s.globalScale : 1))}${fieldHTML("Baseline spacing","dsBase",fmtInput(s.baseline != null ? s.baseline : 9.5))}</div>` +
+        `<div class="field-row">${fieldHTML("Text gap","dsTextOff",fmtInput(s.textOffset != null ? s.textOffset : 1.27))}` +
+          selFieldHTML("Tolerances","dsTolMode",[["none","None"],["sym","Symmetric ±"],["dev","Deviation +/−"],["limits","Limits"]], s.tolMode || "none") +
+        `</div>` +
+        `<div class="field-row">${fieldHTML("Tolerance +","dsTolPlus",fmtInput(s.tolPlus || 0))}${fieldHTML("Tolerance −","dsTolMinus",fmtInput(s.tolMinus || 0))}</div>` +
+        `<label style="display:flex;gap:6px;align-items:center;font-size:12.5px;margin:2px 0 4px"><input type="checkbox" id="dsZeroSupp" ${s.zeroSupp ? "checked" : ""} /> Suppress trailing zeros (decimal/metric values)</label>` +
         `<p class="empty-note">Sample: <strong>${formatDimLen(1473.2, s)}</strong> · New dimensions use the current style; editing a style restyles every dimension that uses it.</p>`;
       const bindS = (id, fn)=>{ const el = document.getElementById(id); if (el) el.addEventListener("change", ()=>{ fn(el); draw(); renderDsEditorSoft(); }); };
       const bindSLen = (id, key)=> bindS(id, el=>{ const v = parseLen(el.value); if (v != null) s[key] = Math.max(0, v); });
@@ -6301,6 +6768,13 @@
       bindSLen("dsTextH", "textH");
       bindSLen("dsExtOff", "extOffset");
       bindSLen("dsExtOver", "extOver");
+      bindSLen("dsBase", "baseline");
+      bindSLen("dsTextOff", "textOffset");
+      bindSLen("dsTolPlus", "tolPlus");
+      bindSLen("dsTolMinus", "tolMinus");
+      bindS("dsTolMode", el=> s.tolMode = el.value);
+      bindS("dsZeroSupp", el=> s.zeroSupp = el.checked);
+      bindS("dsGScale", el=>{ const v = parseFloat(el.value); if (isFinite(v) && v > 0) s.globalScale = v; });
     }
     function renderDsEditorSoft(){ /* keep list current-tag fresh without stealing focus */ }
     $("#dsNew").addEventListener("click", ()=>{
@@ -6401,7 +6875,7 @@
         const L = activeLayout();
         if (L) fitSheet(L);
         setTool("select");
-        setCmdLine("Layout sheet: draw viewports with the Viewport tool, drag inside a viewport to pan its view, scroll over it to change scale. Viewport borders never print.");
+        setCmdLine("Layout sheet: every sheet opens with a default viewport on model space — drag inside it to pan its view, scroll over it to change scale, or set an exact scale in the panel. MVIEW (Viewport tool) adds more. Viewport borders never print.");
       }
       renderLayoutTabs(); renderProps(); draw();
     }
@@ -6880,9 +7354,12 @@
       line:"line", l:"line", polyline:"polyline", pl:"polyline", pline:"polyline",
       rect:"rect", rectangle:"rect", rectang:"rect", rec:"rect", circle:"circle", c:"circle",
       arc:"arc", a:"arc", ellipse:"ellipse", el:"ellipse", polygon:"polygon", pol:"polygon",
-      dim:"dimlinear", dimension:"dimlinear", dli:"dimlinear", dimlinear:"dimlinear",
+      dim:"dim", dimension:"dim", dli:"dimlinear", dimlinear:"dimlinear",
       dal:"dimaligned", dimaligned:"dimaligned", dra:"dimradius", dimradius:"dimradius",
       ddi:"dimdiameter", dimdiameter:"dimdiameter", dan:"dimangular", dimangular:"dimangular",
+      dimbaseline:"dimbaseline", dba:"dimbaseline", dimcontinue:"dimcontinue", dco:"dimcontinue",
+      dimordinate:"dimordinate", dor:"dimordinate", dimarc:"dimarc", dar:"dimarc", dimcenter:"dimcenter", dce:"dimcenter",
+      dimedit:"dimedit", dimtedit:"dimedit", ded:"dimedit",
       text:"text", mtext:"text", mt:"text", dtext:"text", dt:"text", t:"text",
       point:"point", po:"point", select:"select",
       pan:"pan", p:"pan", move:"move", m:"move", copy:"copy", co:"copy", cp:"copy",
@@ -6897,7 +7374,7 @@
       spline:"spline", s:"spline", spl:"spline",
       matchprop:"matchprop", ma:"matchprop",
       dist:"dist", di:"dist", area:"area", aa:"area", id:"id",
-      viewport:"viewport", mview:"viewport"
+      viewport:"viewport", mview:"viewport", mv:"viewport"
     };
     /* ---- command history (the scrolling window above the input) ---- */
     const cmdLogLines = [];
@@ -7415,6 +7892,12 @@
       if (Array.isArray(d.dimStyles) && d.dimStyles.length) dimStyles = d.dimStyles;
       if (d.currentDimStyleId && dimStyles.some(s=>s.id===d.currentDimStyleId)) currentDimStyleId = d.currentDimStyleId;
       layouts = (Array.isArray(d.layouts) && d.layouts.length) ? d.layouts : [ makeLayout("Layout1", "Arch D", "landscape") ];
+      // Sheets saved before layouts gained a default viewport open with one
+      // fitted to the model, exactly as if the sheet had just been created.
+      layouts.forEach(L=>{
+        if (!Array.isArray(L.viewports)) L.viewports = [];
+        if (!L.viewports.length) L.viewports.push(defaultViewport(L));
+      });
       activeTab = "model"; modelView = null;
       selection.clear();
       if (d.name) $("#docName").value = d.name;

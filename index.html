@@ -681,7 +681,7 @@
           <tr><td class="mono">E · R · U · OOPS · LI · DI · AA · ID</td><td>Erase the selection · Redraw · Undo (Ctrl+Z too) · OOPS restores the last erased objects · LIST reports the selection in the command window · DIstance / ARea / ID measure and report</td></tr>
           <tr><td class="mono">D · DS · LA · PR · UN</td><td>Dimension styles · Drafting settings (object-snap modes, tracking, dynamic input, lineweight display) · Layers panel · Properties panel · Units (View tab)</td></tr>
           <tr><td class="mono">F7 Grid · F9 Snap · F8 Ortho · F10 Polar · F3 OSnap · F11 OTrack · F12 Dyn · F2 History</td><td>Ortho locks horizontal/vertical (Shift temporarily inverts it); Polar snaps to the chosen increment plus your custom angles (View tab → Polar settings) with a dotted tracking path and tooltip; object snap finds endpoints, midpoints, centres, quadrants, intersections (nearest optional in DS); OTrack tracks horizontally/vertically from hovered snap points; the status-bar pills at bottom-right toggle the same aids</td></tr>
-          <tr><td class="mono">Typed entry</td><td>Line: length + angle · Rect: W,H · Circle: radius or D120 for diameter · Move/Copy: ΔX,ΔY · Offset: distance, two points, or M for Multiple</td></tr>
+          <tr><td class="mono">Typed entry</td><td>Line: length + angle · Rect: W,H · Circle: radius or D120 for diameter · Move/Copy: type a distance to travel along the polar-tracked direction (direct distance entry), @ΔX,ΔY for a relative vector, or dist&lt;angle · Offset: distance, two points, or M for Multiple</td></tr>
           <tr><td class="mono">Window / Crossing</td><td>No holding the button: click one corner, move, click the opposite corner (press-and-drag still works too). Left→right (blue) selects fully-enclosed objects only; right→left (green dashed) selects anything touched. Works idle and at any "Select objects:" step (MOVE, COPY…); Esc cancels a half-built window</td></tr>
           <tr><td class="mono">Enter / Space</td><td>Space works exactly like Enter (AutoCAD-style): it runs a typed command, confirms typed values and selections, finishes polylines, and repeats the last command when idle. It only inserts a real space while typing actual text</td></tr>
           <tr><td class="mono">Command window</td><td>Drag the grip strip above the command line to show more or fewer history lines (double-click resets); the size is saved with the drawing. Zoom buttons and Fit glide smoothly; the object under the cursor highlights before you pick it</td></tr>
@@ -932,7 +932,7 @@
     let settings = { unit:"ftin", gridSize:25.4, snap:true, osnap:true, gridVisible:true, bg:"dark",
                      otrack:false, selCycle:false, dynInput:true, lwDisplay:true, coordMode:0,
                      osnapModes:{ end:true, mid:true, cen:true, int:true, qua:true, nea:false },
-                     ortho:false, polar:false, polarAngle:45, polarCustom:[], cmdBarH:66 };
+                     ortho:false, polar:true, polarAngle:45, polarCustom:[], cmdBarH:66 };
     let layers = [ { id:"L1", name:"Layer 1", color:"#e8e8e8", visible:true, locked:false } ];
     let currentLayerId = "L1";
     let entities = [];
@@ -3584,8 +3584,19 @@
         return true;
       }
       if ((cmd.name === "move" || cmd.name === "copy") && cmd.step === "dest" && cmd.base){
-        // Enter at "Specify second point or <use first point as displacement>:"
-        // uses the first point itself as the displacement vector.
+        // Typed-but-uncommitted dynamic values commit first: Enter after
+        // typing a distance must place the object, never fall through to
+        // the bare-Enter defaults below (AutoCAD).
+        if (dyn && (dynEdited.a || dynEdited.b)){ dynCommit(); return true; }
+        if (cmd.name === "copy"){
+          // Enter ends COPY (AutoCAD) — it never drops a stray copy at the
+          // base point's own coordinates.
+          setTool("select");
+          setCmdLine("Copy complete. " + HINTS.select);
+          return true;
+        }
+        // MOVE, bare Enter at "Specify second point or <use first point as
+        // displacement>:": the first point itself becomes the displacement.
         applyMoveCopy([cmd.base[0], cmd.base[1]]);
         return true;
       }
@@ -3904,18 +3915,34 @@
           cmd.base = [w.x, w.y]; cmd.step = "dest";
           lastPick = { x: w.x, y: w.y };
           setCmdLine("Specify second point or <use first point as displacement>:");
+          // AutoCAD pointer input at the second-point prompt is POLAR:
+          // a Distance field and an Angle field — NOT ΔX/ΔY. Whatever the
+          // user types as the distance travels along the angle beside it,
+          // and the angle field follows the (polar-tracked) cursor until
+          // it is edited. Typing just a distance + Enter is AutoCAD's
+          // direct distance entry: move that far in the tracked direction.
           showDyn({
-            labelA:"ΔX", labelB:"ΔY", showB:true, followMouse:true,
-            mouseVals: ()=>({ a: fmtInput(mouseW.x-cmd.base[0]), b: fmtInput(mouseW.y-cmd.base[1]) }),
+            labelA:"Dist", labelB:"∠ Angle", showB:true, followMouse:true,
+            mouseVals: ()=>{
+              const dx = mouseW.x-cmd.base[0], dy = mouseW.y-cmd.base[1];
+              let a = Math.atan2(dy, dx)*180/Math.PI; if (a < 0) a += 360;
+              return { a: fmtInput(Math.hypot(dx, dy)), b: a.toFixed(1) };
+            },
             preview: ()=>{
-              const dx = parseLen(dynA.value), dy = parseLen(dynB.value);
-              if (dx == null || dy == null){ dynPt = null; draw(); return; }
-              dynPt = { x: cmd.base[0]+dx, y: cmd.base[1]+dy }; draw();
+              const L = parseLen(dynA.value);
+              const a = parseFloat(dynB.value);
+              if (L == null || isNaN(a)){ dynPt = null; draw(); return; }
+              const r = a*Math.PI/180;
+              dynPt = { x: cmd.base[0] + L*Math.cos(r), y: cmd.base[1] + L*Math.sin(r) }; draw();
             },
             commit: ()=>{
-              const dx = parseLen(dynA.value), dy = parseLen(dynB.value);
-              if (dx != null && dy != null && document.activeElement && (document.activeElement === dynA || document.activeElement === dynB)){
-                applyMoveCopy([dx, dy]);
+              const L = parseLen(dynA.value);
+              const a = parseFloat(dynB.value);
+              if ((dynEdited.a || dynEdited.b) && L != null && !isNaN(a)){
+                // a typed value wins over the click point: the object
+                // travels the typed distance at the typed (or tracked) angle
+                const r = a*Math.PI/180;
+                applyMoveCopy([L*Math.cos(r), L*Math.sin(r)]);
                 return;
               }
               const p = dynPt || mouseW;
@@ -4450,6 +4477,10 @@
         cmd.originals = snapshotSelection();
         cmd.base = cmd.base ? [ (cmd.base[0] + d[0]), (cmd.base[1] + d[1]) ] : [d[0], d[1]];
         dynPt = null;
+        // next placement starts fresh: the dynamic fields follow the mouse
+        // from the new base point again (AutoCAD COPY multiple mode)
+        dynEdited = { a:false, b:false };
+        if (dyn) followDynValues(true);
         setCmdLine("Specify second point or <use first point as displacement>:");
       } else {
         Object.keys(cmd.originals).forEach(id=>{
@@ -6591,6 +6622,22 @@
             if (dv && (trimmed.indexOf(",") !== -1 || trimmed.indexOf("<") !== -1)){
               cmdLog("Command: " + raw.toUpperCase(), "ch-cmd");
               applyMoveCopy(dv);
+              return;
+            }
+            // Direct distance entry (AutoCAD): a bare length at the
+            // second-point prompt travels that far along the current
+            // direction from the base point — the polar-tracked angle
+            // when one is engaged, otherwise the cursor's direction.
+            const Ld = parseLen(trimmed);
+            if (Ld != null && isFinite(Ld)){
+              let ang;
+              if (polarTrack) ang = polarTrack.angle * Math.PI/180;
+              else {
+                const vx = mouseW.x - cmd.base[0], vy = mouseW.y - cmd.base[1];
+                ang = (Math.abs(vx) < 1e-9 && Math.abs(vy) < 1e-9) ? 0 : Math.atan2(vy, vx);
+              }
+              cmdLog("Command: " + raw.toUpperCase(), "ch-cmd");
+              applyMoveCopy([Ld*Math.cos(ang), Ld*Math.sin(ang)]);
               return;
             }
           }
